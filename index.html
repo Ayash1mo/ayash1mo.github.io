@@ -1,2424 +1,1390 @@
 <!doctype html>
 <html lang="zh-CN">
-  <head>
-    <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-    />
-    <title>提瓦特生日指南</title>
-    <meta
-      name="description"
-      content="原神全角色生日倒计时一站式查询，涵盖蒙德、璃月、稻妻、须弥、枫丹、纳塔、至冬等所有地区角色生日。"
-    />
-    <!-- Open Graph / 社交分享 -->
-    <meta property="og:title" content="提瓦特生日指南" />
-    <meta
-      property="og:description"
-      content="原神全角色生日倒计时一站式查询，不错过每一位旅伴的生日庆典"
-    />
-    <meta property="og:type" content="website" />
-    <meta property="og:locale" content="zh_CN" />
-    <meta name="twitter:card" content="summary" />
-    <meta name="twitter:title" content="提瓦特生日指南" />
-    <style>
-      /* ====================== 全局CSS变量定义 ====================== */
-      :root {
-        --primary-color: #8a5cf6;
-        --primary-rgb: 138, 92, 246;
-        --bg-main: #121826;
-        --bg-sidebar: rgba(18, 24, 38, 0.88);
-        --bg-card: rgba(30, 35, 48, 0.75);
-        --card-bg: rgba(255, 255, 255, 0.08);
-        --text-main: #f8fafc;
-        --text-secondary: #94a3b8;
-        --border-color: rgba(138, 92, 246, 0.25);
-        --hover-bg: rgba(138, 92, 246, 0.1);
-        --shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-        --transition: all 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
-        --nav-text-color: #e2e8f0;
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>提瓦特生日 · Teyvat Birthdays</title>
+<meta name="description" content="原神全角色生日倒计时 · 现代简约版" />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎂</text></svg>">
+<style>
+/* ============================================================
+   提瓦特生日 · Modern Minimal（暗色现代 + 高级动效）
+   ============================================================ */
+:root{
+  --bg:#0a0a0c; --bg2:#0e0e12; --surface:#131318; --surface2:#18181f;
+  --ink:#f2f2f5; --ink2:#8a8a94; --ink3:#5c5c66;
+  --line:rgba(255,255,255,.07); --line2:rgba(255,255,255,.12);
+  --brand:#8b6cff; --brand-rgb:139,108,255; --brand-soft:rgba(139,108,255,.12);
+  --ok:#34d399;
+  --sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Segoe UI","Microsoft YaHei",system-ui,sans-serif;
+  --mono:"SF Mono",ui-monospace,"JetBrains Mono","Cascadia Code",Consolas,monospace;
+  --sp:1rem;
+  --r-sm:8px; --r-md:12px; --r-lg:18px; --r-xl:24px;
+  --ease:cubic-bezier(.22,1,.36,1);
+  --dur:.35s;
+}
+[data-theme="light"]{
+  --bg:#f7f7f8; --bg2:#efeff1; --surface:#ffffff; --surface2:#f4f4f6;
+  --ink:#16161a; --ink2:#6b6b74; --ink3:#a0a0aa;
+  --line:rgba(0,0,0,.07); --line2:rgba(0,0,0,.13);
+  --brand:#6d4dff; --brand-rgb:109,77,255; --brand-soft:rgba(109,77,255,.09);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);color:var(--ink);font-family:var(--sans);
+  -webkit-font-smoothing:antialiased;overflow-x:hidden;
+  transition:background .5s var(--ease),color .5s var(--ease);
+}
+::selection{background:rgba(var(--brand-rgb),.4)}
+:focus-visible{outline:2px solid var(--brand);outline-offset:2px;border-radius:4px}
+img{display:block;max-width:100%}
+button{font-family:inherit;border:none;background:none;color:inherit;cursor:pointer}
+.skip{position:absolute;left:-999px;top:0;background:var(--brand);color:#fff;padding:.6rem 1rem;z-index:999;border-radius:0 0 var(--r-md) 0}
+.skip:focus{left:0}
 
-        --container-max-width: 1400px;
-        --safe-padding: 1rem;
+/* ---------- 顶栏：毛玻璃状态栏（顶部高斯模糊 + 向下渐变变清晰） ----------
+   实现思路：
+   1) 用一个绝对定位的「伪状态栏」层 .nav::before 承载 background + backdrop-filter。
+   2) 用 mask-image 做「顶部 → 底部」的遮罩渐变：顶部 alpha=1（完全生效，强模糊），
+      底部 alpha=0（遮罩掉，回到页面原本清晰度）。
+   3) background / backdrop-filter 本身都随遮罩一起淡出，所以「背景可滚动、
+      页面内容在栏下方正常滚过，只在接近顶栏处被磨砂模糊」。
+   4) .nav 自身保持 transparent，只负责定位和承载文字/logo，不遮挡 mask。 */
+.nav{
+  position:sticky;top:0;z-index:100;
+  background:transparent;
+  border-bottom:none;
+}
+.nav::before{
+  content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
+  background:color-mix(in srgb,var(--bg) 72%,transparent);
+  backdrop-filter:blur(16px) saturate(1.4);-webkit-backdrop-filter:blur(16px) saturate(1.4);
+  /* mask-image：顶部强（模糊+底色全开）→ 底部透明（模糊和底色一起消失） */
+  -webkit-mask-image:linear-gradient(to bottom,#000 0%,#000 42%,transparent 100%);
+          mask-image:linear-gradient(to bottom,#000 0%,#000 42%,transparent 100%);
+  -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;
+  -webkit-mask-size:100% 100%;mask-size:100% 100%;
+}
+/* 底部一条更细的渐隐分割线，替代原来硬切的 border-bottom */
+.nav::after{
+  content:"";position:absolute;left:0;right:0;bottom:0;height:1px;
+  background:linear-gradient(to right,transparent,var(--line) 12%,var(--line) 88%,transparent);
+  -webkit-mask-image:linear-gradient(to bottom,#000 0%,transparent 100%);
+          mask-image:linear-gradient(to bottom,#000 0%,transparent 100%);
+  pointer-events:none;
+}
+.nav-in{max-width:1200px;margin:0 auto;padding:.85rem 1.5rem;display:flex;align-items:center;gap:1rem}
+.logo{font-weight:800;font-size:1.05rem;letter-spacing:-.02em;display:flex;align-items:center;gap:.55rem}
+.logo .dot{width:.55rem;height:.55rem;border-radius:50%;background:linear-gradient(135deg,var(--brand),#4cc9f0);box-shadow:0 0 12px rgba(var(--brand-rgb),.7);animation:dotPulse 3s ease-in-out infinite}
+.logo em{font-style:normal;color:var(--ink2);font-weight:500}
+.nav-right{margin-left:auto;display:flex;align-items:center;gap:1rem}
+.clock{font-family:var(--mono);font-size:.72rem;color:var(--ink2);letter-spacing:.05em;font-variant-numeric:tabular-nums;white-space:nowrap}
+.theme-btn{
+  width:34px;height:34px;border-radius:50%;display:grid;place-items:center;
+  border:1px solid var(--line2);color:var(--ink2);transition:all var(--dur) var(--ease);
+}
+.theme-btn:hover{color:var(--ink);border-color:var(--brand);transform:rotate(15deg) scale(1.06)}
+.theme-btn svg{width:16px;height:16px}
+.theme-btn svg{position:absolute;opacity:1;transform:rotate(0) scale(1);transition:opacity var(--dur) var(--ease),transform var(--dur) var(--ease)}
+.theme-btn{position:relative;overflow:visible}
+[data-theme="light"] #iconMoon{opacity:0;transform:rotate(-45deg) scale(.6);pointer-events:none}
+[data-theme="light"] #iconSun{opacity:1;transform:rotate(0) scale(1)}
+#iconSun{opacity:0;transform:rotate(45deg) scale(.6);pointer-events:none}
+[data-theme="light"] #iconSun{opacity:1;pointer-events:auto}
 
-        --space-1: 0.25rem;
-        --space-2: 0.5rem;
-        --space-3: 0.75rem;
-        --space-4: 1rem;
-        --space-5: 1.25rem;
-        --space-6: 1.5rem;
-        --space-8: 2rem;
-        --space-10: 2.5rem;
-        --space-12: 3rem;
-        --space-16: 4rem;
+/* ---------- Hero ---------- */
+.hero{max-width:1200px;margin:0 auto;padding:5rem 1.5rem 3.5rem;position:relative}
+.hero-bg{
+  position:absolute;inset:-40% -20%;z-index:-1;pointer-events:none;
+  background:
+    radial-gradient(42% 38% at 22% 28%,rgba(var(--brand-rgb),.14),transparent 70%),
+    radial-gradient(36% 34% at 82% 18%,rgba(76,201,240,.08),transparent 70%);
+}
+.kicker{
+  font-size:.68rem;font-weight:700;letter-spacing:.42em;color:var(--ink3);
+  text-transform:uppercase;margin-bottom:1.6rem;
+  display:flex;align-items:center;gap:.8rem;
+}
+.kicker::before{content:"";width:2.2rem;height:1px;background:var(--brand)}
+.hero-grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,.65fr);gap:3.5rem;align-items:center}
+.hero-name{
+  font-size:clamp(3.2rem,8vw,6.5rem);font-weight:800;letter-spacing:-.045em;line-height:1.02;
+  margin:.4rem 0 .9rem;
+  background:linear-gradient(120deg,var(--ink) 30%,rgba(var(--brand-rgb),1) 90%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.hero-meta{display:flex;align-items:center;gap:.7rem;margin-bottom:2.4rem;flex-wrap:wrap}
+.tag{
+  font-size:.7rem;font-weight:600;letter-spacing:.14em;padding:.35em .85em;border-radius:999px;
+  border:1px solid var(--line2);color:var(--ink2);
+}
+.tag.brand{background:var(--brand-soft);border-color:rgba(var(--brand-rgb),.4);color:var(--brand)}
+.tag.mono{font-family:var(--mono)}
+.count{display:flex;align-items:flex-start;gap:.35rem}
+.cg{display:flex;flex-direction:column;align-items:center}
+.cd{display:flex}
+.cd-ch{
+  font-family:var(--mono);font-weight:700;
+  font-size:clamp(2.6rem,7vw,4.6rem);line-height:1;
+  font-variant-numeric:tabular-nums;letter-spacing:-.02em;
+}
+.cd-ch.tick{animation:chIn .38s var(--ease)}
+.cd-ch.tick-sec{animation:chInSec .22s var(--ease)}
+@keyframes chInSec{from{transform:translateY(-.35em);opacity:.2}to{transform:none;opacity:1}}
+@keyframes chIn{from{transform:translateY(-.6em);opacity:0;filter:blur(5px)}to{transform:none;opacity:1;filter:blur(0)}}
+.cd-sep{font-family:var(--mono);font-weight:700;font-size:clamp(2rem,5vw,3.2rem);color:var(--ink3);line-height:1.35;margin:0 .1rem}
+.cg label{font-size:.6rem;font-weight:700;letter-spacing:.3em;color:var(--ink3);margin-top:.55rem}
+.hero-note{margin-top:2rem;font-size:.85rem;color:var(--ink2);letter-spacing:.02em;display:flex;gap:.5rem;align-items:center}
+.hero-note::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--ok);box-shadow:0 0 10px var(--ok);animation:dotPulse 2s infinite}
 
-        --radius-sm: 8px;
-        --radius-md: 12px;
-        --radius-lg: 16px;
-        --radius-xl: 20px;
-      }
-      /* ====================== 全局基础样式重置 ====================== */
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        font-family:
-          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
-          Arial, sans-serif;
-      }
-      html {
-        overflow-x: hidden;
-        scroll-behavior: smooth;
-      }
-      body {
-        background-color: var(--bg-main);
-        color: var(--text-main);
-        min-height: 100vh;
-        transition: background-color 0.5s ease;
-        overflow-x: hidden;
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-      }
-      ::-webkit-scrollbar {
-        width: 6px;
-        height: 6px;
-      }
-      ::-webkit-scrollbar-track {
-        background: transparent;
-      }
-      ::-webkit-scrollbar-thumb {
-        background: rgba(var(--primary-rgb), 0.3);
-        border-radius: 3px;
-      }
-      ::-webkit-scrollbar-thumb:hover {
-        background: rgba(var(--primary-rgb), 0.5);
-      }
-      /* ====================== 焦点可见样式（无障碍） ====================== */
-      :focus-visible {
-        outline: 3px solid var(--primary-color);
-        outline-offset: 2px;
-      }
-      .nav-item:focus-visible {
-        outline-offset: -2px;
-      }
-      /* ====================== 侧边栏移动端遮罩层 ====================== */
-      .sidebar-overlay {
-        display: none;
-        position: fixed;
-        inset: 0;
-        z-index: 998;
-        background: transparent;
-        opacity: 0;
-        transition: opacity 0.3s ease;
-        -webkit-tap-highlight-color: transparent;
-      }
-      .sidebar-overlay.active {
-        opacity: 1;
-      }
-      @media (max-width: 1024px) {
-        .sidebar-overlay.active {
-          display: block;
-        }
-        .sidebar.open {
-          background: rgba(0, 0, 0, 0.35);
-          -webkit-backdrop-filter: blur(8px);
-          backdrop-filter: blur(8px);
-          border-right: 1px solid rgba(255, 255, 255, 0.1);
-        }
-      }
-      /* ====================== 跳转链接（Skip Link） ====================== */
-      .skip-link {
-        position: fixed;
-        top: -100%;
-        left: var(--space-4);
-        z-index: 10000;
-        padding: var(--space-3) var(--space-6);
-        background: var(--primary-color);
-        color: #fff;
-        font-weight: 600;
-        border-radius: var(--radius-md);
-        text-decoration: none;
-        transition: top 0.2s ease;
-      }
-      .skip-link:focus {
-        top: var(--space-4);
-      }
-      /* ====================== 汉堡按钮样式 ====================== */
-      .hamburger-btn {
-        position: fixed;
-        top: var(--space-4);
-        left: var(--space-4);
-        z-index: 9999;
-        width: 48px;
-        height: 48px;
-        background: rgba(0, 0, 0, 0.25);
-        backdrop-filter: blur(5px);
-        -webkit-backdrop-filter: blur(5px);
-        border: 1px solid rgba(255, 255, 255, 0.15);
-        border-radius: var(--radius-md);
-        padding: 0;
-        cursor: pointer;
-        color: var(--text-main);
-        box-shadow: var(--shadow);
-        transition: var(--transition);
-        display: none;
-        align-items: center;
-        justify-content: center;
-        opacity: 1;
-        visibility: visible;
-        transform: translateX(0);
-        pointer-events: auto;
-        touch-action: manipulation;
-      }
-      .hamburger-btn:hover {
-        transform: scale(1.05);
-        border-color: rgba(var(--primary-rgb), 0.7);
-        box-shadow: 0 6px 16px rgba(var(--primary-rgb), 0.2);
-      }
-      .hamburger-btn:active {
-        transform: scale(0.98);
-        transition: all 0.1s ease;
-      }
-      .hamburger-btn.hidden {
-        opacity: 0;
-        visibility: hidden;
-        transform: translateX(-10px);
-        pointer-events: none;
-      }
-      .hamburger-btn svg {
-        width: 22px;
-        height: 22px;
-      }
-      .hamburger-btn svg line {
-        stroke-linecap: round;
-        transition: var(--transition);
-      }
-      /* ====================== 左侧侧边栏导航样式 ====================== */
-      .sidebar {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 260px;
-        height: 100vh;
-        background: var(--bg-sidebar);
-        backdrop-filter: blur(5px);
-        -webkit-backdrop-filter: blur(5px);
-        border-right: 1px solid var(--border-color);
-        padding: var(--space-8) 0;
-        display: flex;
-        flex-direction: column;
-        z-index: 999;
-        transition: var(--transition);
-        overflow: hidden;
-      }
-      .sidebar-logo {
-        text-align: center;
-        padding: 0 var(--space-4) var(--space-8);
-        border-bottom: 1px solid var(--border-color);
-        margin-bottom: var(--space-4);
-        flex-shrink: 0;
-      }
-      .sidebar-logo h2 {
-        font-size: 1.4rem;
-        font-weight: 600;
-        color: var(--primary-color);
-        text-shadow: 0 0 10px rgba(var(--primary-rgb), 0.4);
-        letter-spacing: -0.01em;
-        line-height: 1.3;
-      }
-      .nav-list {
-        flex: 1;
-        overflow-y: auto;
-        padding: 0 var(--space-4);
-        display: flex;
-        flex-direction: column;
-        gap: var(--space-3);
-        -webkit-overflow-scrolling: touch;
-        scrollbar-width: thin;
-        scrollbar-color: rgba(var(--primary-rgb), 0.3) transparent;
-      }
-      .nav-item {
-        display: flex;
-        align-items: center;
-        gap: 0.9rem;
-        padding: var(--space-3) var(--space-4);
-        border-radius: var(--radius-md);
-        cursor: pointer;
-        transition: var(--transition);
-        color: var(--nav-text-color);
-        border: 1px solid transparent;
-        font-size: 1.05rem;
-        font-weight: 500;
-        line-height: 1.4;
-        letter-spacing: -0.01em;
-        min-height: 48px;
-        touch-action: manipulation;
-      }
-      .nav-item:hover {
-        background: var(--hover-bg);
-        color: var(--text-main);
-        transform: translateX(4px);
-        border-color: rgba(var(--primary-rgb), 0.15);
-      }
-      .nav-item.active {
-        background: var(--primary-color);
-        color: #ffffff;
-        border-color: var(--primary-color);
-        box-shadow: 0 0 15px rgba(var(--primary-rgb), 0.35);
-        font-weight: 600;
-      }
-      .nav-item .icon {
-        font-size: 1.2rem;
-        width: 24px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-      }
-      .nav-item .icon svg {
-        width: 1.15em;
-        height: 1.15em;
-        display: block;
-      }
-      .sidebar-footer {
-        padding: var(--space-6) var(--space-4) 0;
-        border-top: 1px solid var(--border-color);
-        text-align: center;
-        font-size: 0.8rem;
-        color: var(--text-secondary);
-        opacity: 0.7;
-        flex-shrink: 0;
-        line-height: 1.4;
-      }
-      /* ====================== 右侧主内容区样式 ====================== */
-      .main-container {
-        min-height: 100vh;
-        padding: var(--space-10) var(--space-8);
-        transition: var(--transition);
-        max-width: var(--container-max-width);
-        margin-left: 260px;
-        margin-right: auto;
-        width: calc(100% - 260px);
-      }
-      .page-panel {
-        display: none;
-        animation: fadeIn 0.4s cubic-bezier(0.25, 0.1, 0.25, 1);
-      }
-      .page-panel.active {
-        display: block;
-      }
-      @keyframes fadeIn {
-        from {
-          opacity: 0;
-          transform: translateY(8px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-      /* ====================== 主页角色区样式 ====================== */
-      .home-hero {
-        min-height: 40vh;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        text-align: center;
-        padding: var(--space-16) var(--space-10);
-        border-radius: var(--radius-xl);
-        background: var(--bg-card);
-        border: 1px solid var(--border-color);
-        margin-bottom: var(--space-8);
-        background-image: radial-gradient(
-          circle at 50% 50%,
-          rgba(var(--primary-rgb), 0.18) 0%,
-          transparent 70%
-        );
-        backdrop-filter: blur(10px);
-      }
-      .home-hero h1 {
-        font-size: clamp(2.2rem, 5vw, 4rem);
-        background: linear-gradient(90deg, #8a5cf6, #42b3bd, #e6c07a);
-        -webkit-background-clip: text;
-        background-clip: text;
-        color: transparent;
-        margin-bottom: var(--space-6);
-        letter-spacing: -0.02em;
-        font-weight: 700;
-        line-height: 1.2;
-      }
-      .home-hero p {
-        font-size: clamp(1rem, 2vw, 1.2rem);
-        color: var(--text-secondary);
-        max-width: 700px;
-        margin-bottom: var(--space-4);
-        font-weight: 400;
-        line-height: 1.6;
-      }
-      /* ====================== 板块通用标题样式 ====================== */
-      .section-title {
-        font-size: clamp(1.3rem, 3vw, 1.6rem);
-        margin-bottom: var(--space-5);
-        padding-left: var(--space-4);
-        border-left: 4px solid var(--primary-color);
-        color: var(--text-main);
-        font-weight: 600;
-        letter-spacing: -0.01em;
-        line-height: 1.4;
-      }
-      /* ====================== 空状态提示样式 ====================== */
-      .empty-tip {
-        text-align: center;
-        padding: var(--space-10) var(--space-6);
-        color: var(--text-secondary);
-        font-size: 1.1rem;
-        background: var(--bg-card);
-        border-radius: var(--radius-lg);
-        border: 1px solid var(--border-color);
-        backdrop-filter: blur(10px);
-        line-height: 1.6;
-      }
-      /* ====================== 角色卡片通用样式 ====================== */
-      .card-grid,
-      .nation-grid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: var(--space-5);
-        margin-bottom: var(--space-12);
-        width: 100%;
-      }
-      .original-card {
-        width: 100%;
-        min-width: 0;
-        -webkit-backdrop-filter: blur(0px);
-        backdrop-filter: blur(0px);
-        box-shadow: var(--shadow);
-        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-        border: 1px solid rgba(255, 255, 255, 0.15);
-        border-radius: var(--radius-lg);
-        padding: var(--space-4);
-        background-color: rgba(255, 255, 255, 0.1);
-        transition: transform 0.3s ease;
-        will-change: transform;
-        transform: translateZ(0);
-        display: flex;
-        flex-direction: column;
-      }
-      .original-card img {
-        margin: 0 0 var(--space-3);
-        width: 100%;
-        aspect-ratio: 4/3;
-        object-fit: cover;
-        border-radius: var(--radius-md);
-        background: var(--bg-card);
-        border: 1px solid var(--border-color);
-        image-rendering: -webkit-optimize-contrast;
-        flex-shrink: 0;
-      }
-      .original-card h3 {
-        margin: 0 0 var(--space-2);
-        font-size: clamp(1.1em, 2vw, 1.4em);
-        color: #f1f5f9;
-        font-weight: 600;
-        letter-spacing: -0.01em;
-        line-height: 1.3;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-      .countdown-label {
-        font-size: clamp(12px, 1.5vw, 14px);
-        opacity: 0.8;
-        margin: 0 0 var(--space-1);
-        color: #cbd5e1;
-        line-height: 1.4;
-      }
-      .countdown-time {
-        font-weight: bold;
-        font-size: clamp(1em, 2vw, 1.1em);
-        margin: 0;
-        margin-top: auto;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: clip;
-        color: #f1f5f9;
-        line-height: 1.4;
-      }
-      .today-card .countdown-time {
-        color: #ff6b6b;
-        font-size: clamp(1.1em, 2.2vw, 1.2em);
-      }
-      /* ====================== 地区页面通用样式 ====================== */
-      .nation-header {
-        text-align: center;
-        margin-bottom: var(--space-8);
-        padding-top: var(--space-2);
-      }
-      .nation-title {
-        font-size: clamp(1.8em, 4vw, 2.4em);
-        margin: 0;
-        color: #ffffff;
-        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
-        font-weight: 700;
-        letter-spacing: -0.02em;
-        line-height: 1.3;
-      }
-      .time-display {
-        font-size: clamp(0.9em, 1.8vw, 1.1em);
-        opacity: 0.8;
-        margin-top: var(--space-2);
-        color: var(--text-secondary);
-        line-height: 1.4;
-      }
-      .nation-footer {
-        text-align: center;
-        margin-top: var(--space-10);
-        opacity: 0.6;
-        font-size: 14px;
-        color: var(--text-secondary);
-        line-height: 1.4;
-      }
-      /* ====================== 全局页脚样式 ====================== */
-      footer {
-        text-align: center;
-        padding: var(--space-8);
-        opacity: 0.6;
-        font-size: 14px;
-        margin-top: var(--space-10);
-        border-top: 1px solid var(--border-color);
-        color: var(--text-secondary);
-        line-height: 1.4;
-      }
-      /* ====================== 响应式适配 ====================== */
-      @media (min-width: 1600px) {
-        :root {
-          --container-max-width: 1600px;
-        }
-        .card-grid,
-        .nation-grid {
-          gap: var(--space-6);
-        }
-        .original-card {
-          padding: var(--space-5);
-        }
-      }
-      @media (max-width: 1024px) {
-        .hamburger-btn {
-          display: flex;
-        }
-        .sidebar {
-          left: -260px;
-        }
-        .sidebar.open {
-          left: 0;
-        }
-        .main-container {
-          margin-left: 0;
-          margin-right: 0;
-          width: 100%;
-          padding: 5rem var(--safe-padding) var(--space-8);
-        }
-        .home-hero {
-          padding: 2.5rem 1.5rem;
-          min-height: 30vh;
-          margin-bottom: var(--space-6);
-        }
-        .card-grid,
-        .nation-grid {
-          grid-template-columns: repeat(2, 1fr);
-          gap: var(--space-4);
-          margin-bottom: var(--space-10);
-        }
-        .original-card {
-          padding: var(--space-3);
-        }
-      }
-      @media (max-width: 640px) {
-        .card-grid,
-        .nation-grid {
-          grid-template-columns: repeat(2, 1fr);
-          gap: var(--space-3);
-          margin-bottom: var(--space-8);
-        }
-      }
-      @media (max-width: 480px) {
-        :root {
-          --safe-padding: 0.75rem;
-        }
-        .main-container {
-          padding: 4.5rem var(--safe-padding) 1.5rem;
-        }
-        .home-hero {
-          padding: 2rem 1rem;
-          border-radius: 16px;
-          margin-bottom: var(--space-5);
-          min-height: 25vh;
-        }
-        .section-title {
-          margin-bottom: var(--space-4);
-          padding-left: 0.75rem;
-        }
-        .card-grid,
-        .nation-grid {
-          grid-template-columns: 1fr;
-          gap: var(--space-3);
-          margin-bottom: var(--space-6);
-        }
-        .original-card {
-          padding: var(--space-3);
-          border-radius: 12px;
-          max-width: 100%;
-        }
-        .original-card img {
-          border-radius: 8px;
-          margin: 0 0 var(--space-2);
-        }
-        .original-card h3 {
-          margin: 0 0 var(--space-1);
-        }
-        .empty-tip {
-          padding: var(--space-6) var(--space-4);
-          border-radius: 12px;
-        }
-        footer {
-          padding: var(--space-6);
-          margin-top: var(--space-8);
-        }
-      }
-      @media (max-width: 360px) {
-        .hamburger-btn {
-          width: 44px;
-          height: 44px;
-          top: 0.75rem;
-          left: 0.75rem;
-        }
-        .main-container {
-          padding: 4rem var(--safe-padding) 1rem;
-        }
-        .original-card {
-          padding: var(--space-2);
-        }
-      }
-      @media (max-height: 500px) and (orientation: landscape) {
-        .sidebar {
-          padding: 1rem 0;
-        }
-        .sidebar-logo {
-          padding: 0 1rem 1rem;
-          margin-bottom: 0.5rem;
-        }
-        .nav-item {
-          min-height: 40px;
-          padding: 0.6rem 0.9rem;
-        }
-        .main-container {
-          padding: 4rem 1rem 1.5rem;
-        }
-        .home-hero {
-          min-height: 25vh;
-          padding: 1.5rem 1rem;
-        }
-      }
-    </style>
-  </head>
-  <body>
-    <a href="#main-content" class="skip-link">跳转到主内容</a>
-    <button
-      class="hamburger-btn"
-      id="hamburgerBtn"
-      aria-label="打开导航菜单"
-      aria-expanded="false"
-      aria-controls="sidebar"
-      type="button"
-    >
-      <svg
-        width="24"
-        height="24"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2.5"
-      >
-        <line x1="3" y1="12" x2="21" y2="12"></line>
-        <line x1="3" y1="6" x2="21" y2="6"></line>
-        <line x1="3" y1="18" x2="21" y2="18"></line>
-      </svg>
-    </button>
-    <div class="sidebar-overlay" id="sidebarOverlay"></div>
-    <aside
-      class="sidebar"
-      id="sidebar"
-      role="complementary"
-      aria-label="地区导航菜单"
-    >
-      <div class="sidebar-logo">
-        <h2>提瓦特生日指南</h2>
+/* 主角图 */
+.hero-fig{position:relative;max-width:420px;justify-self:center}
+.hero-fig .frame{
+  border-radius:var(--r-xl);overflow:hidden;border:1px solid var(--line2);
+  background:var(--surface);box-shadow:0 30px 80px -20px rgba(0,0,0,.55);
+  animation:floaty 7s ease-in-out infinite;
+}
+.hero-fig img{width:100%;aspect-ratio:4/5;object-fit:cover;object-position:top;opacity:0;transform:scale(1.06);filter:blur(14px);transition:opacity .8s var(--ease),transform .8s var(--ease),filter .8s var(--ease)}
+.hero-fig img.ld{opacity:1;transform:scale(1);filter:none}
+.hero-fig .badge{
+  position:absolute;left:1rem;bottom:1rem;
+  font-size:.68rem;font-weight:700;letter-spacing:.2em;color:#fff;
+  background:rgba(10,10,12,.55);border:1px solid rgba(255,255,255,.18);
+  backdrop-filter:blur(8px);padding:.45em 1em;border-radius:999px;
+}
+
+/* ---------- 今日 ---------- */
+.today-bar{max-width:1200px;margin:0 auto;padding:0 1.5rem 2.2rem}
+.today-inner{
+  border-radius:var(--r-lg);padding:1rem 1.4rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap;
+  background:linear-gradient(120deg,var(--brand-soft),transparent 65%);
+  border:1px solid rgba(var(--brand-rgb),.3);position:relative;overflow:hidden;
+}
+.today-inner::before{
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(100deg,transparent 30%,rgba(var(--brand-rgb),.14) 50%,transparent 70%);
+  transform:translateX(-100%);animation:sheen 3.5s ease-in-out infinite;
+}
+.today-pill{font-size:.72rem;font-weight:800;letter-spacing:.22em;color:#fff;background:var(--brand);padding:.4em 1em;border-radius:999px;position:relative}
+.today-who{font-weight:700;font-size:.95rem;position:relative}
+.today-who span{color:var(--brand);margin:0 .15em}
+.today-none{font-size:.82rem;color:var(--ink2);position:relative}
+.today-none .today-next{color:var(--brand);font-weight:700}
+.today-badge{font-size:.68rem;font-weight:700;letter-spacing:.14em;color:var(--brand);background:var(--brand-soft);border:1px solid rgba(var(--brand-rgb),.35);padding:.32em .8em;border-radius:999px;position:relative}
+
+/* ---------- 过滤条 ---------- */
+.filter-wrap{position:sticky;top:60px;z-index:90}
+.filters{
+  max-width:1200px;margin:0 auto;padding:.7rem 1.5rem;display:flex;gap:.45rem;overflow-x:auto;
+  scrollbar-width:none;
+  /* 去掉 backdrop-filter，避免和顶栏毛玻璃叠出「双重模糊」；
+     只保留纯色/半透明底色，让整页只有一层毛玻璃（顶栏） */
+  background:color-mix(in srgb,var(--bg) 92%,transparent);
+  border-block:1px solid var(--line);
+}
+.filters::-webkit-scrollbar{display:none}
+.filters .hint{font-size:.65rem;color:var(--ink3);letter-spacing:.25em;align-self:center;margin-right:.4rem;white-space:nowrap}
+.pill{
+  font-size:.78rem;font-weight:600;padding:.4em 1em;border-radius:999px;white-space:nowrap;
+  color:var(--ink2);border:1px solid transparent;
+  transition:color var(--dur) var(--ease),background var(--dur) var(--ease),border-color var(--dur) var(--ease),transform var(--dur) var(--ease);
+}
+.pill i{font-style:normal;font-family:var(--mono);font-size:.62em;opacity:.55;margin-left:.35em}
+.pill:hover{color:var(--ink);border-color:var(--line2);transform:translateY(-1px)}
+.pill.on{color:#fff;background:var(--brand);border-color:var(--brand);box-shadow:0 6px 20px -6px rgba(var(--brand-rgb),.6)}
+
+/* ---------- 年鉴 ---------- */
+.almanac{max-width:1200px;margin:0 auto;padding:2.5rem 1.5rem 4rem}
+.month{margin-bottom:3.5rem}
+.month.hide{display:none}
+.month-head{display:flex;align-items:baseline;gap:1rem;margin-bottom:1.4rem}
+.month-no{font-family:var(--mono);font-weight:700;font-size:2rem;color:transparent;-webkit-text-stroke:1px var(--ink3);letter-spacing:-.03em}
+.month-name{font-weight:800;font-size:1.15rem;letter-spacing:.12em}
+.month-cnt{font-family:var(--mono);font-size:.68rem;color:var(--ink3);letter-spacing:.2em}
+.month-rule{flex:1;height:1px;background:var(--line)}
+.month-next{font-family:var(--mono);font-size:.68rem;color:var(--brand)}
+.month-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:.9rem}
+
+/* ---------- 角色卡 ---------- */
+.card{
+  position:relative;border-radius:var(--r-lg);overflow:hidden;
+  background:var(--surface);border:1px solid var(--line);
+  transition:transform var(--dur) var(--ease),border-color var(--dur) var(--ease),box-shadow var(--dur) var(--ease),opacity var(--dur) var(--ease);
+  will-change:transform;
+}
+.card::after{ /* 跟随光标的光泽 */
+  content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  background:radial-gradient(340px circle at var(--mx,50%) var(--my,50%),rgba(255,255,255,.07),transparent 55%);
+  opacity:0;transition:opacity .4s;
+}
+[data-theme="light"] .card::after{background:radial-gradient(340px circle at var(--mx,50%) var(--my,50%),rgba(109,77,255,.08),transparent 55%)}
+.card:hover{border-color:rgba(var(--brand-rgb),.45);box-shadow:0 20px 50px -18px rgba(0,0,0,.6)}
+.card:hover::after{opacity:1}
+.card.hide{display:none}
+.card-img{position:relative;background:var(--surface2);overflow:hidden;aspect-ratio:4/3}
+.card-img img{
+  width:100%;height:100%;object-fit:cover;object-position:top;
+  opacity:0;transform:scale(1.05);filter:blur(10px) grayscale(.6);
+  transition:opacity .55s var(--ease),transform .55s var(--ease),filter .55s var(--ease);
+}
+.card-img img.ld{opacity:1;transform:scale(1);filter:blur(0) grayscale(.25)}
+.card:hover .card-img img.ld{filter:blur(0) grayscale(0);transform:scale(1.03)}
+.card-body{padding:.85rem .95rem .95rem}
+.card-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:.3rem}
+.card-nat{font-size:.62rem;color:var(--ink3);letter-spacing:.1em}
+.card h3{font-size:1.06rem;font-weight:750;letter-spacing:-.01em;margin-bottom:.15rem}
+.card-date{font-family:var(--mono);font-size:.68rem;color:var(--ink2);letter-spacing:.22em;margin-bottom:.55rem}
+.card-cd{
+  font-family:var(--mono);font-size:.72rem;color:var(--ink2);
+  border-top:1px solid var(--line);padding-top:.5rem;
+  font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.card.today{border-color:rgba(var(--brand-rgb),.55);box-shadow:0 0 0 1px rgba(var(--brand-rgb),.35),0 18px 46px -16px rgba(var(--brand-rgb),.45)}
+.card.today .card-cd{color:var(--brand);font-weight:700}
+.card.soon{border-color:rgba(var(--brand-rgb),.28)}
+.card.soon .card-cd{color:var(--brand)}
+.stamp{
+  position:absolute;top:.6rem;right:.6rem;z-index:2;
+  font-size:.58rem;font-weight:800;letter-spacing:.16em;padding:.32em .7em;border-radius:999px;
+}
+.card.today .stamp{background:var(--brand);color:#fff;animation:dotPulse 2.2s infinite}
+.card.soon .stamp{background:var(--brand-soft);color:var(--brand);border:1px solid rgba(var(--brand-rgb),.4)}
+
+/* ---------- 页脚 ---------- */
+.foot{border-top:1px solid var(--line);padding:3rem 1.5rem 4rem;text-align:center}
+.foot .f-logo{font-weight:800;letter-spacing:-.02em;margin-bottom:.6rem}
+.foot p{font-size:.72rem;color:var(--ink3);letter-spacing:.18em;line-height:2}
+
+/* ---------- 动效 ---------- */
+@keyframes dotPulse{0%,100%{opacity:1}50%{opacity:.45}}
+@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@keyframes sheen{0%{transform:translateX(-100%)}55%,100%{transform:translateX(100%)}}
+@keyframes riseIn{from{opacity:0;transform:translateY(26px);filter:blur(6px)}to{opacity:1;transform:none;filter:blur(0)}}
+.rise{opacity:0}
+.rise.in{animation:riseIn .7s var(--ease) both}
+.hero .kicker,.hero-name,.hero-meta,.count,.hero-note,.hero-fig{opacity:0;animation:riseIn .8s var(--ease) forwards}
+.hero .kicker{animation-delay:.05s}.hero-name{animation-delay:.15s}.hero-meta{animation-delay:.25s}
+.count{animation-delay:.35s}.hero-note{animation-delay:.5s}.hero-fig{animation-delay:.3s}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  .rise,.hero .kicker,.hero-name,.hero-meta,.count,.hero-note,.hero-fig{opacity:1}
+  .card-img img,.hero-fig img{opacity:1;transform:none;filter:none}
+}
+
+/* ---------- 响应式 ---------- */
+@media (max-width:880px){
+  .hero{padding-top:3rem}
+  .hero-grid{grid-template-columns:1fr;gap:2rem}
+  .hero-fig{max-width:380px}
+  .clock{display:none}
+  .filter-wrap{top:56px}
+}
+@media (max-width:520px){
+  .nav-in,.filters,.almanac,.today-bar{padding-left:1rem;padding-right:1rem}
+  .month-grid{grid-template-columns:repeat(auto-fill,minmax(min(42vw,180px),1fr));gap:.6rem}
+  .hero-fig{max-width:100%}
+  /* 移动端卡片：图片区改 1/1，配合上面的列宽锁定，整卡接近正方形 */
+  .card-img{aspect-ratio:1/1}
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">跳转到主内容</a>
+
+<header class="nav">
+  <div class="nav-in">
+    <div class="logo"><span class="dot"></span>提瓦特生日<em>· TEYVAT</em></div>
+    <div class="nav-right">
+      <span class="clock" id="clock" aria-live="polite">—</span>
+      <button class="theme-btn" id="themeBtn" aria-label="切换明暗主题">
+        <svg id="iconMoon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg>
+        <svg id="iconSun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+  <section class="hero">
+    <div class="hero-bg" aria-hidden="true"></div>
+    <p class="kicker">Next Birthday · 下一位庆生</p>
+    <div class="hero-grid">
+      <div>
+        <h1 class="hero-name" id="heroName">—</h1>
+        <div class="hero-meta" id="heroMeta"></div>
+        <div class="count" id="heroCount" aria-label="倒计时"></div>
+        <p class="hero-note" id="heroNote">全站倒计时每秒自动刷新 · 跨午夜自动更新</p>
       </div>
-      <nav
-        class="nav-list"
-        id="navList"
-        role="navigation"
-        aria-label="地区列表"
-      >
-        <div class="nav-item active" data-hash="home">
-          <span class="icon">
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.6"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              aria-hidden="true"
-            >
-              <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8" />
-              <path
-                d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"
-              />
-            </svg>
-          </span>
-          <span>主页</span>
+      <figure class="hero-fig" id="heroFig" style="visibility:hidden">
+        <div class="frame">
+          <img id="heroImg" alt="" loading="eager" fetchpriority="high" decoding="async">
+          <span class="badge" id="heroBadge">NEXT</span>
         </div>
-      </nav>
-      <div class="sidebar-footer">
-        <p>© 2026 by Ayash1mo</p>
-      </div>
-    </aside>
-    <main class="main-container" id="main-content">
-      <section
-        class="page-panel active"
-        id="home-panel"
-        role="tabpanel"
-        aria-label="主页"
-      >
-        <div class="home-hero">
-          <h1>提瓦特生日倒计时</h1>
-          <p>全地区角色生日一站式查询，不错过每一位旅伴的生日庆典</p>
-          <p class="time-display" id="home-realTime" aria-live="polite">
-            加载中...
-          </p>
-        </div>
-        <div class="today-birthday">
-          <h2 class="section-title">🎉 今天过生日的角色</h2>
-          <div
-            class="card-grid"
-            id="todayBirthdayGrid"
-            aria-live="polite"
-          ></div>
-        </div>
-        <div class="upcoming-birthday">
-          <h2 class="section-title">📅 未来15天内即将到来的生日</h2>
-          <div
-            class="card-grid"
-            id="upcomingBirthdayGrid"
-            aria-live="polite"
-          ></div>
-        </div>
-      </section>
-      <section
-        class="page-panel"
-        id="mondstadt-panel"
-        role="tabpanel"
-        aria-label="蒙德"
-      >
-        <div class="nation-container">
-          <div class="nation-header">
-            <h1 class="nation-title">蒙德</h1>
-            <p class="time-display" id="mondstadt-realTime" aria-live="polite">
-              加载中...
-            </p>
-          </div>
-          <div class="nation-grid" id="mondstadt-characterGrid"></div>
-        </div>
-      </section>
-      <section
-        class="page-panel"
-        id="liyue-panel"
-        role="tabpanel"
-        aria-label="璃月"
-      >
-        <div class="nation-container">
-          <div class="nation-header">
-            <h1 class="nation-title">璃月</h1>
-            <p class="time-display" id="liyue-realTime">加载中...</p>
-          </div>
-          <div class="nation-grid" id="liyue-characterGrid"></div>
-        </div>
-      </section>
-      <section
-        class="page-panel"
-        id="inazuma-panel"
-        role="tabpanel"
-        aria-label="稻妻"
-      >
-        <div class="nation-container">
-          <div class="nation-header">
-            <h1 class="nation-title">稻妻</h1>
-            <p class="time-display" id="inazuma-realTime">加载中...</p>
-          </div>
-          <div class="nation-grid" id="inazuma-characterGrid"></div>
-        </div>
-      </section>
-      <section
-        class="page-panel"
-        id="sumeru-panel"
-        role="tabpanel"
-        aria-label="须弥"
-      >
-        <div class="nation-container">
-          <div class="nation-header">
-            <h1 class="nation-title">须弥</h1>
-            <p class="time-display" id="sumeru-realTime" aria-live="polite">
-              加载中...
-            </p>
-          </div>
-          <div class="nation-grid" id="sumeru-characterGrid"></div>
-        </div>
-      </section>
-      <section
-        class="page-panel"
-        id="fontaine-panel"
-        role="tabpanel"
-        aria-label="枫丹"
-      >
-        <div class="nation-container">
-          <div class="nation-header">
-            <h1 class="nation-title">枫丹</h1>
-            <p class="time-display" id="fontaine-realTime">加载中...</p>
-          </div>
-          <div class="nation-grid" id="fontaine-characterGrid"></div>
-        </div>
-      </section>
-      <section
-        class="page-panel"
-        id="natlan-panel"
-        role="tabpanel"
-        aria-label="纳塔"
-      >
-        <div class="nation-container">
-          <div class="nation-header">
-            <h1 class="nation-title">纳塔</h1>
-            <p class="time-display" id="natlan-realTime">加载中...</p>
-          </div>
-          <div class="nation-grid" id="natlan-characterGrid"></div>
-        </div>
-      </section>
-      <section
-        class="page-panel"
-        id="snezhnaya-panel"
-        role="tabpanel"
-        aria-label="至冬"
-      >
-        <div class="nation-container">
-          <div class="nation-header">
-            <h1 class="nation-title">至冬</h1>
-            <p class="time-display" id="snezhnaya-realTime">加载中...</p>
-          </div>
-          <div class="nation-grid" id="snezhnaya-characterGrid"></div>
-        </div>
-      </section>
-      <section
-        class="page-panel"
-        id="nodkrai-panel"
-        role="tabpanel"
-        aria-label="挪德卡莱"
-      >
-        <div class="nation-container">
-          <div class="nation-header">
-            <h1 class="nation-title">挪德卡莱</h1>
-            <p class="time-display" id="nodkrai-realTime">加载中...</p>
-          </div>
-          <div class="nation-grid" id="nodkrai-characterGrid"></div>
-        </div>
-      </section>
-      <section
-        class="page-panel"
-        id="beyondtheworld-panel"
-        role="tabpanel"
-        aria-label="其他"
-      >
-        <div class="nation-container">
-          <div class="nation-header">
-            <h1 class="nation-title">其他</h1>
-            <p class="time-display" id="beyondtheworld-realTime">加载中...</p>
-          </div>
-          <div class="nation-grid" id="beyondtheworld-characterGrid"></div>
-        </div>
-      </section>
-    </main>
-    <script>
-      // ====================== 全局配置项 ======================
-      // ====================== 地区图标（内联 SVG 线稿） ======================
-      // 每个地区取一处地标作为图标，统一 24x24 线稿，描边跟随文字颜色
-      const ICON_SVG_ATTRS =
-        'viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"';
+      </figure>
+    </div>
+  </section>
 
-      const makeIcon = (body) =>
-        `<svg ${ICON_SVG_ATTRS}>${body}</svg>`;
+  <div class="today-bar"><div class="today-inner" id="todayBox"></div></div>
 
-      const nationIcons = {
-        // 主页 · 小屋
-        home: makeIcon(`
-          <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8" />
-          <path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-        `),
-        // 蒙德 · 风车
-        mondstadt: makeIcon(`
-          <circle cx="12" cy="7.6" r="1.5" />
-          <path d="M12 7.6 8.1 3.7" />
-          <path d="M12 7.6 15.9 3.7" />
-          <path d="M12 7.6 8.1 11.5" />
-          <path d="M12 7.6 15.9 11.5" />
-          <path d="M12 9.1v11.4" />
-          <path d="M8.8 20.5h6.4" />
-        `),
-        // 璃月 · 飞檐牌坊
-        liyue: makeIcon(`
-          <path d="M12 2.8v1.7" />
-          <path d="M6.6 9 12 4.5 17.4 9" />
-          <path d="M6.6 9c-1.2.1-2-.1-2.6-.6" />
-          <path d="M17.4 9c1.2.1 2-.1 2.6-.6" />
-          <path d="M7.8 9.3v2.7" />
-          <path d="M16.2 9.3v2.7" />
-          <path d="M4.5 12h15" />
-          <path d="M8.6 12.3v8.2" />
-          <path d="M15.4 12.3v8.2" />
-          <path d="M6.2 20.5h11.6" />
-        `),
-        // 稻妻 · 鸟居
-        inazuma: makeIcon(`
-          <path d="M2.6 5.6c2.9.8 5.9 1.2 9.4 1.2s6.5-.4 9.4-1.2" />
-          <path d="M5.2 9.2h13.6" />
-          <path d="M7.9 6.5 7 20.5" />
-          <path d="M16.1 6.5 17 20.5" />
-        `),
-        // 须弥 · 圣树
-        sumeru: makeIcon(`
-          <path d="M8 19a4 4 0 0 1-2.24-7.32A3.5 3.5 0 0 1 9 6.03V6a3 3 0 1 1 6 0v.04a3.5 3.5 0 0 1 3.24 5.65A4 4 0 0 1 16 19Z" />
-          <path d="M12 19v3" />
-        `),
-        // 枫丹 · 喷泉
-        fontaine: makeIcon(`
-          <circle cx="12" cy="2.8" r="1.1" />
-          <path d="M12 3.9v6.6" />
-          <path d="M3.6 10.5h16.8" />
-          <path d="M3.6 10.5c0 4.2 3.8 7 8.4 7s8.4-2.8 8.4-7" />
-          <path d="M12 17.5v3" />
-          <path d="M8.6 20.5h6.8" />
-        `),
-        // 纳塔 · 火山
-        natlan: makeIcon(`
-          <path d="M2.8 20.5h18.4" />
-          <path d="M6.6 20.5 9.8 9.2h4.4l3.2 11.3" />
-          <path d="M9.6 7.2a3.2 3.2 0 0 1 4.8 0" />
-          <path d="M10.8 4.2a1.8 1.8 0 0 1 2.4 0" />
-        `),
-        // 至冬 · 穹顶宫殿
-        snezhnaya: makeIcon(`
-          <path d="M12 2.2v1.4" />
-          <path d="M12 3.6c1.9 1.5 2.9 2.9 2.9 4.1 0 1.5-1.3 2.6-2.9 2.6s-2.9-1.1-2.9-2.6c0-1.2 1-2.6 2.9-4.1Z" />
-          <path d="M7.2 10.3h9.6" />
-          <path d="M8.4 10.3v10.2" />
-          <path d="M15.6 10.3v10.2" />
-          <path d="M5 20.5h14" />
-          <path d="M10.6 20.5v-3.2a1.4 1.4 0 0 1 2.8 0v3.2" />
-        `),
-        // 挪德卡莱 · 月牙与星
-        nodkrai: makeIcon(`
-          <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
-          <path d="M19.4 2.2 q .5 1.5 2 2 q -1.5 .5 -2 2 q -.5 -1.5 -2 -2 q 1.5 -.5 2 -2 Z" />
-        `),
-        // 其他 · 星海
-        beyondtheworld: makeIcon(`
-          <path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z" />
-          <path d="M20 3v4" />
-          <path d="M22 5h-4" />
-          <path d="M4 17v2" />
-          <path d="M5 18H3" />
-        `),
-      };
+  <div class="filter-wrap"><nav class="filters" id="filters" aria-label="地区过滤"></nav></div>
 
-      // ====================== 地区列表 ======================
-      const nationList = [
-        {
-          name: "蒙德",
-          hash: "mondstadt",
-          bg: "#42B3BD",
-          primary: "#2A939C",
-        },
-        {
-          name: "璃月",
-          hash: "liyue",
-          bg: "#E6C07A",
-          primary: "#B88F46",
-        },
-        {
-          name: "稻妻",
-          hash: "inazuma",
-          bg: "#A76BC7",
-          primary: "#8A4BA0",
-        },
-        {
-          name: "须弥",
-          hash: "sumeru",
-          bg: "#86B84F",
-          primary: "#6A993E",
-        },
-        {
-          name: "枫丹",
-          hash: "fontaine",
-          bg: "#5FA8D3",
-          primary: "#3D88B8",
-        },
-        {
-          name: "纳塔",
-          hash: "natlan",
-          bg: "#E27A4E",
-          primary: "#C15A32",
-        },
-        {
-          name: "至冬",
-          hash: "snezhnaya",
-          bg: "#73C6D9",
-          primary: "#4A98AF",
-        },
-        {
-          name: "挪德卡莱",
-          hash: "nodkrai",
-          bg: "#243655",
-          primary: "#1A2A42",
-        },
-        {
-          name: "其他",
-          hash: "beyondtheworld",
-          bg: "#161625",
-          primary: "#7C3AED",
-        },
-      ];
+  <div class="almanac" id="almanac"></div>
+</main>
 
-      const allRoleList = [
-        // 蒙德 24人
-        {
-          name: "温迪",
-          nation: "蒙德",
-          birthday: "06-16",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/2/20/n7fr5xrf4d3gcivxktprxmp1ze5171k.png/1200px-%E6%B8%A9%E8%BF%AA%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        {
-          name: "琴",
-          nation: "蒙德",
-          birthday: "03-14",
-          image:
-            "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/dea5ece7ee126ebd2246d7cd963752a5_1417052722963956277.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp",
-        },
-        {
-          name: "法尔伽",
-          nation: "蒙德",
-          birthday: "02-17",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/a/a3/482kibaof2mc0hfi50uvu9kvbg5xv55.png/1200px-%E6%B3%95%E5%B0%94%E4%BC%BD%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        {
-          name: "杜林",
-          nation: "蒙德",
-          birthday: "03-14",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/7/73/q1hetz3svx98winupq5qbai45ww2t1o.png/1200px-%E6%9D%9C%E6%9E%97%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        {
-          name: "洛恩",
-          nation: "蒙德",
-          birthday: "04-03",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/1/1a/nvu8pg4vkvicbbva53xg75hvpa3yvbk.png/1920px-%E6%B4%9B%E6%81%A9%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        {
-          name: "布伦妮",
-          nation: "蒙德",
-          birthday: "11-20",
-          image:
-            "https://patchwiki.biligame.com/images/ys/0/08/dbdwv9if3ywf71mqex3ajiwkqjtapr1.png",
-        },
-        {
-          name: "安柏",
-          nation: "蒙德",
-          birthday: "08-10",
-          image:
-            "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/7bbdf4885bbe0c9d91bb0b202482dfd3_7501173286059949014.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp",
-        },
-        {
-          name: "丽莎",
-          nation: "蒙德",
-          birthday: "06-09",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/7/70/q3oapvjdcr344dr90kvvulvp24e98o6.png/1920px-%E4%B8%BD%E8%8E%8E%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        {
-          name: "凯亚",
-          nation: "蒙德",
-          birthday: "11-30",
-          image:
-            "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/52cdc153be2a74c954fa70e4eb8558dc_5365271345012190127.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp",
-        },
-        {
-          name: "迪卢克",
-          nation: "蒙德",
-          birthday: "04-30",
-          image:
-            "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/444d759ee16a78ecb2eee32616ec3c61_8367772886214773599.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp",
-        },
-        {
-          name: "芭芭拉",
-          nation: "蒙德",
-          birthday: "07-05",
-          image:
-            "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/361034bc5f9104c7675612f1e334e141_5681713636829283585.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp",
-        },
-        {
-          name: "雷泽",
-          nation: "蒙德",
-          birthday: "09-09",
-          image:
-            "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/4f1b144a11410ca576710cb538c926c4_8292535106696181160.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp",
-        },
-        {
-          name: "可莉",
-          nation: "蒙德",
-          birthday: "07-27",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/6/64/5mcsfdvyw68fhoq36i8u8lz9oghyy3s.png/1200px-%E5%8F%AF%E8%8E%89%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        {
-          name: "班尼特",
-          nation: "蒙德",
-          birthday: "02-29",
-          image:
-            "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/29ca301df308db11a0da02e40beb71a6_2738643943661903391.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp",
-        },
-        {
-          name: "诺艾尔",
-          nation: "蒙德",
-          birthday: "03-21",
-          image:
-            "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/19b8b377601a039e2ce5bab2f4771c7b_6593001839488888030.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp",
-        },
-        {
-          name: "菲谢尔",
-          nation: "蒙德",
-          birthday: "05-27",
-          image:
-            "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/363e41c96c3d80a083e8c478dce8c043_8434967507951967883.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp",
-        },
-        {
-          name: "砂糖",
-          nation: "蒙德",
-          birthday: "11-26",
-          image:
-            "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/6976af5db02fb864027007283c44c86d_6367216792198349343.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp",
-        },
-        {
-          name: "迪奥娜",
-          nation: "蒙德",
-          birthday: "01-18",
-          image:
-            "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/d9273c1a61c446994773f7942beed1d4_8404092942110031495.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp",
-        },
-        {
-          name: "阿贝多",
-          nation: "蒙德",
-          birthday: "09-13",
-          image:
-            "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/6e55f1b6f7b5ad580ec11b63aab2fa0c_685983993390724324.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp",
-        },
-        {
-          name: "罗莎莉亚",
-          nation: "蒙德",
-          birthday: "01-24",
-          image:
-            "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/cede3149966e2f483944cc72f213932b_5684644131117993694.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp",
-        },
-        {
-          name: "优菈",
-          nation: "蒙德",
-          birthday: "10-25",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/5/50/ej8v3104cmwt4lk4iciq4u5fab2h0se.png/1200px-%E4%BC%98%E8%8F%88%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        {
-          name: "莫娜",
-          nation: "蒙德",
-          birthday: "08-31",
-          image:
-            "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/833bc780726f651931fa21fe484853af_184290504769854186.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp",
-        },
-        {
-          name: "米卡",
-          nation: "蒙德",
-          birthday: "08-11",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/e/e5/1yt3wz7ab753algoxbvrd16sk2wtl73.png/1200px-%E7%B1%B3%E5%8D%A1%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        {
-          name: "塔利雅",
-          nation: "蒙德",
-          birthday: "05-25",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/a/aa/cyb1r1yiqjg4fifu8gu80yz8tc9uiea.png/1200px-%E5%A1%94%E5%88%A9%E9%9B%85%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        // 璃月 22人
-        {
-          name: "钟离",
-          nation: "璃月",
-          birthday: "12-31",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/9/9e/a2ghv2y1wf92b0zxofvgcenmn1bfu3e.png/1200px-%E9%92%9F%E7%A6%BB%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        {
-          name: "凝光",
-          nation: "璃月",
-          birthday: "08-26",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/3/38/2ydmdrrld0u8s2h8u6qjun63qcr090n.png/1200px-%E5%87%9D%E5%85%89%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        {
-          name: "北斗",
-          nation: "璃月",
-          birthday: "02-14",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/5/5d/f7ak6xcy4b8jpx28yesn9hft9j2g83p.png/1200px-%E5%8C%97%E6%96%97%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        {
-          name: "香菱",
-          nation: "璃月",
-          birthday: "11-02",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/b/bc/4rbb4w3wtkkn58kdlcvy67v9vll1oii.png/1200px-%E9%A6%99%E8%8F%B1%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        {
-          name: "行秋",
-          nation: "璃月",
-          birthday: "10-09",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/b/b0/6ejxlb6ewx7jtbru1wf7j2knn0v3xat.png/1200px-%E8%A1%8C%E7%A7%8B%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        {
-          name: "重云",
-          nation: "璃月",
-          birthday: "09-07",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/7/73/gqa6ud0np0ji3nti05q4e8tb8e28tyv.png/1200px-%E9%87%8D%E4%BA%91%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        {
-          name: "七七",
-          nation: "璃月",
-          birthday: "03-03",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/9/9e/a07s0rx81ej83mtw5btgms66dwirfxq.png/1200px-%E4%B8%83%E4%B8%83%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        {
-          name: "刻晴",
-          nation: "璃月",
-          birthday: "11-20",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/2/21/p163qpi54cviea6v8eohvfh9kuqn90p.png/1200px-%E5%88%BB%E6%99%B4%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        {
-          name: "烟绯",
-          nation: "璃月",
-          birthday: "07-28",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/5/55/g5tkq72alialfo730s2qw2x2yo3h92g.png/1200px-%E7%83%9F%E7%BB%AF%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        {
-          name: "甘雨",
-          nation: "璃月",
-          birthday: "12-02",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/d/da/80cmpy7ubhja1o81nx67709701et0fe.png/1200px-%E7%94%98%E9%9B%A8%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        {
-          name: "胡桃",
-          nation: "璃月",
-          birthday: "07-15",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/f/f8/81z6247pn39kw3iyhss34977vlkxgvd.png/1200px-%E8%83%A1%E6%A1%83%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        {
-          name: "魈",
-          nation: "璃月",
-          birthday: "04-17",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/c/c7/aodeicaxmvx44c56cbflizonowwyv9f.png/1200px-%E9%AD%88%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        {
-          name: "申鹤",
-          nation: "璃月",
-          birthday: "03-10",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/a/a8/skhfkgcgbldvk62j66x9wc1tqcamx2u.png/1200px-%E7%94%B3%E9%B9%A4%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        {
-          name: "云堇",
-          nation: "璃月",
-          birthday: "05-21",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/a/aa/jyxi5vjit6z3sdws78l7nmucrrmgm4u.png/1200px-%E4%BA%91%E5%A0%87%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        {
-          name: "夜兰",
-          nation: "璃月",
-          birthday: "04-20",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/a/a5/hx77v5nkgd0gry1kxro6iu7rmp2qhpk.png/1200px-%E5%A4%9C%E5%85%B0%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        {
-          name: "瑶瑶",
-          nation: "璃月",
-          birthday: "03-06",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/7/7e/5d1rrp2h3r1c2p8ut3evp1wp7qyj14k.png/1200px-%E7%91%B6%E7%91%B6%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        {
-          name: "白术",
-          nation: "璃月",
-          birthday: "04-25",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/d/dc/hd32prl6c6znvbomzs72nxspovevccr.png/1200px-%E7%99%BD%E6%9C%AF%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        {
-          name: "闲云",
-          nation: "璃月",
-          birthday: "04-11",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/5/58/9ud0c2um0p4ilmy23fervltk247hugm.png/1200px-%E9%97%B2%E4%BA%91%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        {
-          name: "辛焱",
-          nation: "璃月",
-          birthday: "10-16",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/2/26/37z07lsvns7jpeuxjjd99qxx66wxzyr.png/1200px-%E8%BE%9B%E7%84%B1%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        {
-          name: "嘉明",
-          nation: "璃月",
-          birthday: "12-22",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/c/c5/87sr2fgmdebr4zrae9ohpxqgbquvjr3.png/1200px-%E5%98%89%E6%98%8E%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        {
-          name: "蓝砚",
-          nation: "璃月",
-          birthday: "01-06",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/e/ee/mzxl5ir7q15xhsm3denbi7pal47xio8.png/1200px-%E8%93%9D%E7%A0%9A%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        {
-          name: "兹白",
-          nation: "璃月",
-          birthday: "05-15",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/0/04/1niyyjlaa3m5156282xigfnyjpw9d8s.png/1200px-%E5%85%B9%E7%99%BD%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        // 稻妻 17人
-        {
-          name: "雷电将军",
-          nation: "稻妻",
-          birthday: "06-26",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/4/40/p6nf0fmeur6uyzo9b2njc0eah85iqez.png/1200px-%E9%9B%B7%E7%94%B5%E5%B0%86%E5%86%9B%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        {
-          name: "神里绫华",
-          nation: "稻妻",
-          birthday: "09-28",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/2/2d/5t7bdjldztvz7uws8rlc7qszqmklj5k.png/1200px-%E7%A5%9E%E9%87%8C%E7%BB%AB%E5%8D%8E%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        {
-          name: "神里绫人",
-          nation: "稻妻",
-          birthday: "03-26",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/1/1b/qnzrbzr1kdh4tvln4lrmllnymyjpioq.png/1200px-%E7%A5%9E%E9%87%8C%E7%BB%AB%E4%BA%BA%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        {
-          name: "宵宫",
-          nation: "稻妻",
-          birthday: "06-21",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/c/ca/ak7wbwvs5dohk0o00ta1p16cw7mqhy5.png/1200px-%E5%AE%B5%E5%AE%AB%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        {
-          name: "枫原万叶",
-          nation: "稻妻",
-          birthday: "10-29",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/2/2e/8axspmt9skhra6q0k1jy5kv2atswoqu.png/1200px-%E6%9E%AB%E5%8E%9F%E4%B8%87%E5%8F%B6%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        {
-          name: "珊瑚宫心海",
-          nation: "稻妻",
-          birthday: "02-22",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/c/c4/tgx4rcscilxq7sjvnpc47pko176owxp.png/1200px-%E7%8F%8A%E7%91%9A%E5%AE%AB%E5%BF%83%E6%B5%B7%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        {
-          name: "荒泷一斗",
-          nation: "稻妻",
-          birthday: "06-01",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/4/4b/rfie5tugl47vdpg6l60n2778qcnioa0.png/1200px-%E8%8D%92%E6%B3%B7%E4%B8%80%E6%96%97%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        {
-          name: "九条裟罗",
-          nation: "稻妻",
-          birthday: "07-14",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/3/30/l99w4mxc9fqxv3raopyfkl0vkowb2rs.png/1200px-%E4%B9%9D%E6%9D%A1%E8%A3%9F%E7%BD%97%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        {
-          name: "早柚",
-          nation: "稻妻",
-          birthday: "10-19",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/a/a8/6ue1stov5j93gzmxasay9nkihtfyls4.png/1200px-%E6%97%A9%E6%9F%9A%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        {
-          name: "五郎",
-          nation: "稻妻",
-          birthday: "05-18",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/2/20/698pw3rhtlv98wk2nft8lsujnhaaca2.png/1200px-%E4%BA%94%E9%83%8E%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        {
-          name: "八重神子",
-          nation: "稻妻",
-          birthday: "06-27",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/3/3d/hy9x8mzx00o8oj5iysddzh36r460eo5.png/1200px-%E5%85%AB%E9%87%8D%E7%A5%9E%E5%AD%90%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        {
-          name: "久岐忍",
-          nation: "稻妻",
-          birthday: "07-27",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/2/2e/a1uwcgjdfzq91yayyf2h3vzzhxl82fk.png/1200px-%E4%B9%85%E5%B2%90%E5%BF%8D%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        {
-          name: "鹿野院平藏",
-          nation: "稻妻",
-          birthday: "07-24",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/a/a9/btczophxiavxfkpghlnkka7ljr0hvpf.png/1200px-%E9%B9%BF%E9%87%8E%E9%99%A2%E5%B9%B3%E8%97%8F%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        {
-          name: "绮良良",
-          nation: "稻妻",
-          birthday: "01-22",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/2/28/4clwisy16drv8tjlv7zu39dnqx8id9t.png/1200px-%E7%BB%AE%E8%89%AF%E8%89%AF%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        {
-          name: "托马",
-          nation: "稻妻",
-          birthday: "01-09",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/1/17/s8loyv7uvtz9o9xyvi78motuuiyzf88.png/1200px-%E6%89%98%E9%A9%AC%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        {
-          name: "梦见月瑞希",
-          nation: "稻妻",
-          birthday: "03-16",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/6/6f/l9s7pilrk0smm4fbc90rac1p0yxqqb9.png/1200px-%E6%A2%A6%E8%A7%81%E6%9C%88%E7%91%9E%E5%B8%8C%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        {
-          name: "千织",
-          nation: "稻妻",
-          birthday: "08-17",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/6/6b/i4gqk9xqqpngo5z2yph372obd25qhju.png/1200px-%E5%8D%83%E7%BB%87%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        // 须弥 14人
-        {
-          name: "纳西妲",
-          nation: "须弥",
-          birthday: "10-27",
-          image:
-            "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/72bbf4182fb00050831eb3daeb3dc399_1448444344327077034.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp",
-        },
-        {
-          name: "艾尔海森",
-          nation: "须弥",
-          birthday: "02-11",
-          image:
-            "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/ffb9b86bab7187fe710684d320ed340a_7328281658707313605.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp",
-        },
-        {
-          name: "赛诺",
-          nation: "须弥",
-          birthday: "06-23",
-          image:
-            "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/923c436b0ae35c0ac892683591518c93_8701764055479519355.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp",
-        },
-        {
-          name: "妮露",
-          nation: "须弥",
-          birthday: "12-03",
-          image:
-            "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/cc60b9185e07dea54e8b8d6740eba75d_7809319089813017104.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp",
-        },
-        {
-          name: "坎蒂丝",
-          nation: "须弥",
-          birthday: "05-03",
-          image:
-            "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/9368ff9cdee75a750c91965109d558ee_5760647270758762717.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp",
-        },
-        {
-          name: "柯莱",
-          nation: "须弥",
-          birthday: "05-08",
-          image:
-            "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/255a3cb2675060b9028e998db07ba3d7_2528032461505871833.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp",
-        },
-        {
-          name: "提纳里",
-          nation: "须弥",
-          birthday: "12-29",
-          image:
-            "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/3b68f706a0bb82a594e2e6f745ce6f1b_4300386788035218940.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp",
-        },
-        {
-          name: "多莉",
-          nation: "须弥",
-          birthday: "12-21",
-          image:
-            "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/5c61746469847501e4e64b714e21fa29_6539438103403154237.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp",
-        },
-        {
-          name: "莱依拉",
-          nation: "须弥",
-          birthday: "12-19",
-          image:
-            "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/32fb51fc05a53c8b45b0ce874c7ecaa8_5949025011801073710.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp",
-        },
-        {
-          name: "珐露珊",
-          nation: "须弥",
-          birthday: "08-20",
-          image:
-            "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/f6df28eb30a669dddf6c8c7ac6e54b26_9183613530230063316.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp",
-        },
-        {
-          name: "卡维",
-          nation: "须弥",
-          birthday: "07-09",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/d/d8/k9sy7d8oy78ivgytnxe0hlz0w1sr9vi.png/1200px-%E5%8D%A1%E7%BB%B4%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        {
-          name: "迪希雅",
-          nation: "须弥",
-          birthday: "04-07",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/8/83/46sk6niudrigkaco19g2cea3rz3lddj.png/1200px-%E8%BF%AA%E5%B8%8C%E9%9B%85%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        {
-          name: "赛索斯",
-          nation: "须弥",
-          birthday: "05-31",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/2/2f/o6e3tvf3hpb4848bc6rtiwlo3cesuru.png/1200px-%E8%B5%9B%E7%B4%A2%E6%96%AF%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        {
-          name: "流浪者",
-          nation: "须弥",
-          birthday: "01-03",
-          image:
-            "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/d12cf6d2d7c7affada976e70d10a0c50_5281066649940682533.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp",
-        },
-        // 枫丹 13人
-        {
-          name: "芙宁娜",
-          nation: "枫丹",
-          birthday: "10-13",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/a/ac/4elolwtt2g03t8qbql9uuh6vzexv1jo.png/1200px-%E8%8A%99%E5%AE%81%E5%A8%9C%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        {
-          name: "那维莱特",
-          nation: "枫丹",
-          birthday: "12-18",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/b/bb/q18lrpnhiaa2kextqc14p9j72xhls8y.png/1200px-%E9%82%A3%E7%BB%B4%E8%8E%B1%E7%89%B9%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        {
-          name: "林尼",
-          nation: "枫丹",
-          birthday: "02-02",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/7/7f/qbhe0nettga7yfi97ndp6v79n1fz6xi.png/1200px-%E6%9E%97%E5%B0%BC%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        {
-          name: "琳妮特",
-          nation: "枫丹",
-          birthday: "02-02",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/2/27/htqbidz6atrpb3k3y4q82ni8jehljzu.png/1200px-%E7%90%B3%E5%A6%AE%E7%89%B9%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        {
-          name: "菲米尼",
-          nation: "枫丹",
-          birthday: "09-24",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/6/64/bpajsgn11yjfj2cype9ad0ezilx8yxm.png/1200px-%E8%8F%B2%E7%B1%B3%E5%B0%BC%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        {
-          name: "娜维娅",
-          nation: "枫丹",
-          birthday: "08-16",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/a/ad/hhqtzmz7auhpr6uh071gzbdbcakghsk.png/1200px-%E5%A8%9C%E7%BB%B4%E5%A8%85%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        {
-          name: "克洛琳德",
-          nation: "枫丹",
-          birthday: "09-20",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/9/99/lp20ww7qqzy8q6ctnam5q2fm6stegrp.png/1200px-%E5%85%8B%E6%B4%9B%E7%90%B3%E5%BE%B7%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        {
-          name: "莱欧斯利",
-          nation: "枫丹",
-          birthday: "11-23",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/b/b3/2lbfry95afhdtr6sver177wr90ukpe1.png/1200px-%E8%8E%B1%E6%AC%A7%E6%96%AF%E5%88%A9%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        {
-          name: "夏洛蒂",
-          nation: "枫丹",
-          birthday: "04-10",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/7/7d/h1dvbabbpt35oo3ils94hv21nbwz4fc.png/1200px-%E5%A4%8F%E6%B4%9B%E8%92%82%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        {
-          name: "艾梅莉埃",
-          nation: "枫丹",
-          birthday: "09-22",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/6/61/tixmb998eyafd8tr6potqe5j3pt761b.png/1200px-%E8%89%BE%E6%A2%85%E8%8E%89%E5%9F%83%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        {
-          name: "夏沃蕾",
-          nation: "枫丹",
-          birthday: "01-10",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/6/60/ctywsukka685asai2fxlwek40y978hp.png/1200px-%E5%A4%8F%E6%B2%83%E8%95%BE%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        {
-          name: "希格雯",
-          nation: "枫丹",
-          birthday: "03-30",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/1/1d/sn839y70by5oxjpxb7d2ghrvrpg53lv.png/1200px-%E5%B8%8C%E6%A0%BC%E9%9B%AF%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        {
-          name: "爱可菲",
-          nation: "枫丹",
-          birthday: "06-08",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/c/c7/37zfiao6sbm2zta7mvh2u56kr9sodiq.png/1200px-%E7%88%B1%E5%8F%AF%E8%8F%B2%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        // 纳塔 11人
-        {
-          name: "玛薇卡",
-          nation: "纳塔",
-          birthday: "08-28",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/8/8d/kodchd9iqqn2hfq8b1cucckhpdcaqqi.png/1200px-%E7%8E%9B%E8%96%87%E5%8D%A1%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        {
-          name: "基尼奇",
-          nation: "纳塔",
-          birthday: "11-11",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/1/19/baq5hhc6odttveep456o7u9kqdoivbm.png/1200px-%E5%9F%BA%E5%B0%BC%E5%A5%87%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        {
-          name: "欧洛伦",
-          nation: "纳塔",
-          birthday: "10-14",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/5/5b/2yfuhrdg9kzoydt6szw614sexlitta5.png/1200px-%E6%AC%A7%E6%B4%9B%E4%BC%A6%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        {
-          name: "玛拉妮",
-          nation: "纳塔",
-          birthday: "08-03",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/0/0e/6ytuso69fejc3fqy93jm37jauzn2zbc.png/1200px-%E7%8E%9B%E6%8B%89%E5%A6%AE%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        {
-          name: "伊安珊",
-          nation: "纳塔",
-          birthday: "08-08",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/2/2e/jfqxgxu8dvtv2cp1x9o7zy91dvhyw9a.png/1200px-%E4%BC%8A%E5%AE%89%E7%8F%8A%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        {
-          name: "恰斯卡",
-          nation: "纳塔",
-          birthday: "12-10",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/8/87/j4r7j7g6wlobhqlrbzt0yijq43y0nkz.png/1200px-%E6%81%B0%E6%96%AF%E5%8D%A1%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        {
-          name: "瓦雷莎",
-          nation: "纳塔",
-          birthday: "11-15",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/c/c0/94m8ilmrjrzotugcmgmi3r69g7vcxpp.png/1200px-%E7%93%A6%E9%9B%B7%E8%8E%8E%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        {
-          name: "希诺宁",
-          nation: "纳塔",
-          birthday: "03-13",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/2/21/r68ykvcqtsshriop2u7onp2euuh8ev8.png/1200px-%E5%B8%8C%E8%AF%BA%E5%AE%81%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        {
-          name: "伊法",
-          nation: "纳塔",
-          birthday: "03-23",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/3/3f/3eooznddqyw7goq8pyj7uq8wgg8bk25.png/1200px-%E4%BC%8A%E6%B3%95%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        {
-          name: "卡齐娜",
-          nation: "纳塔",
-          birthday: "04-22",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/6/6f/b0audskinp19xo7a9ti0exllkwv2vxg.png/1200px-%E5%8D%A1%E9%BD%90%E5%A8%9C%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        {
-          name: "茜特菈莉",
-          nation: "纳塔",
-          birthday: "01-20",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/e/e0/srjrwy2mjj6raqil39tftplz86v5uvt.png/1200px-%E8%8C%9C%E7%89%B9%E8%8F%88%E8%8E%89%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        // 至冬 7人
-        {
-          name: "达达利亚",
-          nation: "至冬",
-          birthday: "07-20",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/5/5c/izckkan4xp0jipykwrotxw8slckyonw.png/1200px-%E8%BE%BE%E8%BE%BE%E5%88%A9%E4%BA%9A%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        {
-          name: "阿蕾奇诺",
-          nation: "至冬",
-          birthday: "08-22",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/9/92/s3aeb46uh2ldeamwbg4zcag8vvjtbmc.png/1200px-%E9%98%BF%E8%95%BE%E5%A5%87%E8%AF%BA%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        {
-          name: "桑多涅",
-          nation: "至冬",
-          birthday: "01-13",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/9/95/21afqdb120t02zyzrb1s5dt0mz43sqj.png/1920px-%E6%A1%91%E5%A4%9A%E6%B6%85%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        {
-          name: "奥黛塔",
-          nation: "至冬",
-          birthday: "02-20",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/6/68/m06hi6a1xn161ykmewxne6y5dtg9ndm.png/1920px-%E5%A5%A5%E9%BB%9B%E5%A1%94%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        {
-          name: "阿罗夏",
-          nation: "至冬",
-          birthday: "02-09",
-          image:
-            "https://patchwiki.biligame.com/images/ys/c/c1/sse18oo2pao9eajbzoml2v8r4notahp.png",
-        },
-        {
-          name: "薇斯纳",
-          nation: "至冬",
-          birthday: "02-04",
-          image:
-            "https://patchwiki.biligame.com/images/ys/1/1c/2e5zygs40dugbzi9bjjvmw3vnayzqef.png",
-        },
-        {
-          name: "沃雅妮莎",
-          nation: "至冬",
-          birthday: "03-29",
-          image:
-            "https://patchwiki.biligame.com/images/ys/5/5d/t96bz0psdgx9aai649uge4tpqj0mj88.png",
-        },
-        // 挪德卡莱 9人
-        {
-          name: "哥伦比娅",
-          nation: "挪德卡莱",
-          birthday: "01-14",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/7/7c/d4lmgkm6twg4wr7o1qitzecyga7gzkj.png/1200px-%E5%93%A5%E4%BC%A6%E6%AF%94%E5%A8%85%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        {
-          name: "菲林斯",
-          nation: "挪德卡莱",
-          birthday: "10-31",
-          image:
-            "https://patchwiki.biligame.com/images/ys/0/01/7x5w5kr4mz62nyxxisvi9wm9dthn7rl.png",
-        },
-        {
-          name: "菈乌玛",
-          nation: "挪德卡莱",
-          birthday: "03-10",
-          image:
-            "https://patchwiki.biligame.com/images/ys/8/8e/lpi0rxdt1srx5amlki12502tn2bnb6r.png",
-        },
-        {
-          name: "爱诺",
-          nation: "挪德卡莱",
-          birthday: "09-21",
-          image:
-            "https://patchwiki.biligame.com/images/ys/5/51/4hzh7cmbq50nw87la981tp84ciafuof.png",
-        },
-        {
-          name: "伊涅芙",
-          nation: "挪德卡莱",
-          birthday: "04-02",
-          image:
-            "https://patchwiki.biligame.com/images/ys/d/d6/74uqhk7rq0udthey661wlc3qafku4w4.png",
-        },
-        {
-          name: "奈芙尔",
-          nation: "挪德卡莱",
-          birthday: "05-09",
-          image:
-            "https://patchwiki.biligame.com/images/ys/c/c8/01oe7symf354wrj344vd1o5n8it9iwo.png",
-        },
-        {
-          name: "雅珂达",
-          nation: "挪德卡莱",
-          birthday: "01-05",
-          image:
-            "https://patchwiki.biligame.com/images/ys/f/f8/00lum9bzqtte2j02sjtmj012o7ncp2h.png",
-        },
-        {
-          name: "莉奈娅",
-          nation: "挪德卡莱",
-          birthday: "05-23",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/f/f3/03dern5jtaybbkuh32oh6ygzxa4gbv1.png/1200px-%E8%8E%89%E5%A5%88%E5%A8%85%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        {
-          name: "叶洛亚",
-          nation: "挪德卡莱",
-          birthday: "12-23",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/f/f6/qql6g1nn9d32neqrbvc0kftweotqoe0.png/1200px-%E5%8F%B6%E6%B4%9B%E4%BA%9A%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        // 其他 3人
-        {
-          name: "埃洛伊",
-          nation: "其他",
-          birthday: "04-04",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/d/d4/c8i1nyrrh12e697sj221agawnx4gdkb.png/1200px-%E5%9F%83%E6%B4%9B%E4%BC%8A%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        {
-          name: "丝柯克",
-          nation: "其他",
-          birthday: "11-05",
-          image:
-            "https://patchwiki.biligame.com/images/ys/thumb/d/d0/ehtz002534qqe7cfgtpxvbxir5b2oxg.png/1200px-%E4%B8%9D%E6%9F%AF%E5%85%8B%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
-        },
-        {
-          name: "尼可",
-          nation: "其他",
-          birthday: "09-29",
-          image:
-            "https://patchwiki.biligame.com/images/ys/c/cb/q71jqsy9wye69pzzpezj3sa6at8gnhz.png",
-        },
-      ];
+<footer class="foot">
+  <div class="f-logo">Teyvat Birthdays</div>
+  <p id="footCount">— 位旅伴 · 皆有名讳与日期<br>Ayash1mo</p>
+</footer>
 
-      let lastHomeRenderDate = new Date().toDateString();
+<script>
+/* ====================== 角色数据（原样保留 120 条） ====================== */
+const allRoleList = [
+  {
+    "name": "温迪",
+    "nation": "蒙德",
+    "birthday": "06-16",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/2/20/n7fr5xrf4d3gcivxktprxmp1ze5171k.png/1200px-%E6%B8%A9%E8%BF%AA%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "琴",
+    "nation": "蒙德",
+    "birthday": "03-14",
+    "image": "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/dea5ece7ee126ebd2246d7cd963752a5_1417052722963956277.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp"
+  },
+  {
+    "name": "法尔伽",
+    "nation": "蒙德",
+    "birthday": "02-17",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/a/a3/482kibaof2mc0hfi50uvu9kvbg5xv55.png/1200px-%E6%B3%95%E5%B0%94%E4%BC%BD%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "杜林",
+    "nation": "蒙德",
+    "birthday": "03-14",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/7/73/q1hetz3svx98winupq5qbai45ww2t1o.png/1200px-%E6%9D%9C%E6%9E%97%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "洛恩",
+    "nation": "蒙德",
+    "birthday": "04-03",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/1/1a/nvu8pg4vkvicbbva53xg75hvpa3yvbk.png/1920px-%E6%B4%9B%E6%81%A9%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "布伦妮",
+    "nation": "蒙德",
+    "birthday": "11-20",
+    "image": "https://patchwiki.biligame.com/images/ys/0/08/dbdwv9if3ywf71mqex3ajiwkqjtapr1.png"
+  },
+  {
+    "name": "安柏",
+    "nation": "蒙德",
+    "birthday": "08-10",
+    "image": "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/7bbdf4885bbe0c9d91bb0b202482dfd3_7501173286059949014.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp"
+  },
+  {
+    "name": "丽莎",
+    "nation": "蒙德",
+    "birthday": "06-09",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/7/70/q3oapvjdcr344dr90kvvulvp24e98o6.png/1920px-%E4%B8%BD%E8%8E%8E%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "凯亚",
+    "nation": "蒙德",
+    "birthday": "11-30",
+    "image": "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/52cdc153be2a74c954fa70e4eb8558dc_5365271345012190127.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp"
+  },
+  {
+    "name": "迪卢克",
+    "nation": "蒙德",
+    "birthday": "04-30",
+    "image": "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/444d759ee16a78ecb2eee32616ec3c61_8367772886214773599.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp"
+  },
+  {
+    "name": "芭芭拉",
+    "nation": "蒙德",
+    "birthday": "07-05",
+    "image": "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/361034bc5f9104c7675612f1e334e141_5681713636829283585.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp"
+  },
+  {
+    "name": "雷泽",
+    "nation": "蒙德",
+    "birthday": "09-09",
+    "image": "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/4f1b144a11410ca576710cb538c926c4_8292535106696181160.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp"
+  },
+  {
+    "name": "可莉",
+    "nation": "蒙德",
+    "birthday": "07-27",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/6/64/5mcsfdvyw68fhoq36i8u8lz9oghyy3s.png/1200px-%E5%8F%AF%E8%8E%89%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "班尼特",
+    "nation": "蒙德",
+    "birthday": "02-29",
+    "image": "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/29ca301df308db11a0da02e40beb71a6_2738643943661903391.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp"
+  },
+  {
+    "name": "诺艾尔",
+    "nation": "蒙德",
+    "birthday": "03-21",
+    "image": "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/19b8b377601a039e2ce5bab2f4771c7b_6593001839488888030.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp"
+  },
+  {
+    "name": "菲谢尔",
+    "nation": "蒙德",
+    "birthday": "05-27",
+    "image": "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/363e41c96c3d80a083e8c478dce8c043_8434967507951967883.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp"
+  },
+  {
+    "name": "砂糖",
+    "nation": "蒙德",
+    "birthday": "11-26",
+    "image": "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/6976af5db02fb864027007283c44c86d_6367216792198349343.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp"
+  },
+  {
+    "name": "迪奥娜",
+    "nation": "蒙德",
+    "birthday": "01-18",
+    "image": "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/d9273c1a61c446994773f7942beed1d4_8404092942110031495.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp"
+  },
+  {
+    "name": "阿贝多",
+    "nation": "蒙德",
+    "birthday": "09-13",
+    "image": "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/6e55f1b6f7b5ad580ec11b63aab2fa0c_685983993390724324.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp"
+  },
+  {
+    "name": "罗莎莉亚",
+    "nation": "蒙德",
+    "birthday": "01-24",
+    "image": "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/cede3149966e2f483944cc72f213932b_5684644131117993694.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp"
+  },
+  {
+    "name": "优菈",
+    "nation": "蒙德",
+    "birthday": "10-25",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/5/50/ej8v3104cmwt4lk4iciq4u5fab2h0se.png/1200px-%E4%BC%98%E8%8F%88%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "莫娜",
+    "nation": "蒙德",
+    "birthday": "08-31",
+    "image": "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/833bc780726f651931fa21fe484853af_184290504769854186.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp"
+  },
+  {
+    "name": "米卡",
+    "nation": "蒙德",
+    "birthday": "08-11",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/e/e5/1yt3wz7ab753algoxbvrd16sk2wtl73.png/1200px-%E7%B1%B3%E5%8D%A1%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "塔利雅",
+    "nation": "蒙德",
+    "birthday": "05-25",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/a/aa/cyb1r1yiqjg4fifu8gu80yz8tc9uiea.png/1200px-%E5%A1%94%E5%88%A9%E9%9B%85%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "钟离",
+    "nation": "璃月",
+    "birthday": "12-31",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/9/9e/a2ghv2y1wf92b0zxofvgcenmn1bfu3e.png/1200px-%E9%92%9F%E7%A6%BB%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "凝光",
+    "nation": "璃月",
+    "birthday": "08-26",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/3/38/2ydmdrrld0u8s2h8u6qjun63qcr090n.png/1200px-%E5%87%9D%E5%85%89%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "北斗",
+    "nation": "璃月",
+    "birthday": "02-14",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/5/5d/f7ak6xcy4b8jpx28yesn9hft9j2g83p.png/1200px-%E5%8C%97%E6%96%97%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "香菱",
+    "nation": "璃月",
+    "birthday": "11-02",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/b/bc/4rbb4w3wtkkn58kdlcvy67v9vll1oii.png/1200px-%E9%A6%99%E8%8F%B1%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "行秋",
+    "nation": "璃月",
+    "birthday": "10-09",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/b/b0/6ejxlb6ewx7jtbru1wf7j2knn0v3xat.png/1200px-%E8%A1%8C%E7%A7%8B%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "重云",
+    "nation": "璃月",
+    "birthday": "09-07",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/7/73/gqa6ud0np0ji3nti05q4e8tb8e28tyv.png/1200px-%E9%87%8D%E4%BA%91%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "七七",
+    "nation": "璃月",
+    "birthday": "03-03",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/9/9e/a07s0rx81ej83mtw5btgms66dwirfxq.png/1200px-%E4%B8%83%E4%B8%83%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "刻晴",
+    "nation": "璃月",
+    "birthday": "11-20",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/2/21/p163qpi54cviea6v8eohvfh9kuqn90p.png/1200px-%E5%88%BB%E6%99%B4%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "烟绯",
+    "nation": "璃月",
+    "birthday": "07-28",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/5/55/g5tkq72alialfo730s2qw2x2yo3h92g.png/1200px-%E7%83%9F%E7%BB%AF%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "甘雨",
+    "nation": "璃月",
+    "birthday": "12-02",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/d/da/80cmpy7ubhja1o81nx67709701et0fe.png/1200px-%E7%94%98%E9%9B%A8%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "胡桃",
+    "nation": "璃月",
+    "birthday": "07-15",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/f/f8/81z6247pn39kw3iyhss34977vlkxgvd.png/1200px-%E8%83%A1%E6%A1%83%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "魈",
+    "nation": "璃月",
+    "birthday": "04-17",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/c/c7/aodeicaxmvx44c56cbflizonowwyv9f.png/1200px-%E9%AD%88%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "申鹤",
+    "nation": "璃月",
+    "birthday": "03-10",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/a/a8/skhfkgcgbldvk62j66x9wc1tqcamx2u.png/1200px-%E7%94%B3%E9%B9%A4%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "云堇",
+    "nation": "璃月",
+    "birthday": "05-21",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/a/aa/jyxi5vjit6z3sdws78l7nmucrrmgm4u.png/1200px-%E4%BA%91%E5%A0%87%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "夜兰",
+    "nation": "璃月",
+    "birthday": "04-20",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/a/a5/hx77v5nkgd0gry1kxro6iu7rmp2qhpk.png/1200px-%E5%A4%9C%E5%85%B0%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "瑶瑶",
+    "nation": "璃月",
+    "birthday": "03-06",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/7/7e/5d1rrp2h3r1c2p8ut3evp1wp7qyj14k.png/1200px-%E7%91%B6%E7%91%B6%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "白术",
+    "nation": "璃月",
+    "birthday": "04-25",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/d/dc/hd32prl6c6znvbomzs72nxspovevccr.png/1200px-%E7%99%BD%E6%9C%AF%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "闲云",
+    "nation": "璃月",
+    "birthday": "04-11",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/5/58/9ud0c2um0p4ilmy23fervltk247hugm.png/1200px-%E9%97%B2%E4%BA%91%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "辛焱",
+    "nation": "璃月",
+    "birthday": "10-16",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/2/26/37z07lsvns7jpeuxjjd99qxx66wxzyr.png/1200px-%E8%BE%9B%E7%84%B1%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "嘉明",
+    "nation": "璃月",
+    "birthday": "12-22",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/c/c5/87sr2fgmdebr4zrae9ohpxqgbquvjr3.png/1200px-%E5%98%89%E6%98%8E%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "蓝砚",
+    "nation": "璃月",
+    "birthday": "01-06",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/e/ee/mzxl5ir7q15xhsm3denbi7pal47xio8.png/1200px-%E8%93%9D%E7%A0%9A%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "兹白",
+    "nation": "璃月",
+    "birthday": "05-15",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/0/04/1niyyjlaa3m5156282xigfnyjpw9d8s.png/1200px-%E5%85%B9%E7%99%BD%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "雷电将军",
+    "nation": "稻妻",
+    "birthday": "06-26",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/4/40/p6nf0fmeur6uyzo9b2njc0eah85iqez.png/1200px-%E9%9B%B7%E7%94%B5%E5%B0%86%E5%86%9B%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "神里绫华",
+    "nation": "稻妻",
+    "birthday": "09-28",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/2/2d/5t7bdjldztvz7uws8rlc7qszqmklj5k.png/1200px-%E7%A5%9E%E9%87%8C%E7%BB%AB%E5%8D%8E%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "神里绫人",
+    "nation": "稻妻",
+    "birthday": "03-26",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/1/1b/qnzrbzr1kdh4tvln4lrmllnymyjpioq.png/1200px-%E7%A5%9E%E9%87%8C%E7%BB%AB%E4%BA%BA%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "宵宫",
+    "nation": "稻妻",
+    "birthday": "06-21",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/c/ca/ak7wbwvs5dohk0o00ta1p16cw7mqhy5.png/1200px-%E5%AE%B5%E5%AE%AB%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "枫原万叶",
+    "nation": "稻妻",
+    "birthday": "10-29",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/2/2e/8axspmt9skhra6q0k1jy5kv2atswoqu.png/1200px-%E6%9E%AB%E5%8E%9F%E4%B8%87%E5%8F%B6%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "珊瑚宫心海",
+    "nation": "稻妻",
+    "birthday": "02-22",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/c/c4/tgx4rcscilxq7sjvnpc47pko176owxp.png/1200px-%E7%8F%8A%E7%91%9A%E5%AE%AB%E5%BF%83%E6%B5%B7%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "荒泷一斗",
+    "nation": "稻妻",
+    "birthday": "06-01",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/4/4b/rfie5tugl47vdpg6l60n2778qcnioa0.png/1200px-%E8%8D%92%E6%B3%B7%E4%B8%80%E6%96%97%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "九条裟罗",
+    "nation": "稻妻",
+    "birthday": "07-14",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/3/30/l99w4mxc9fqxv3raopyfkl0vkowb2rs.png/1200px-%E4%B9%9D%E6%9D%A1%E8%A3%9F%E7%BD%97%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "早柚",
+    "nation": "稻妻",
+    "birthday": "10-19",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/a/a8/6ue1stov5j93gzmxasay9nkihtfyls4.png/1200px-%E6%97%A9%E6%9F%9A%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "五郎",
+    "nation": "稻妻",
+    "birthday": "05-18",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/2/20/698pw3rhtlv98wk2nft8lsujnhaaca2.png/1200px-%E4%BA%94%E9%83%8E%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "八重神子",
+    "nation": "稻妻",
+    "birthday": "06-27",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/3/3d/hy9x8mzx00o8oj5iysddzh36r460eo5.png/1200px-%E5%85%AB%E9%87%8D%E7%A5%9E%E5%AD%90%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "久岐忍",
+    "nation": "稻妻",
+    "birthday": "07-27",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/2/2e/a1uwcgjdfzq91yayyf2h3vzzhxl82fk.png/1200px-%E4%B9%85%E5%B2%90%E5%BF%8D%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "鹿野院平藏",
+    "nation": "稻妻",
+    "birthday": "07-24",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/a/a9/btczophxiavxfkpghlnkka7ljr0hvpf.png/1200px-%E9%B9%BF%E9%87%8E%E9%99%A2%E5%B9%B3%E8%97%8F%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "绮良良",
+    "nation": "稻妻",
+    "birthday": "01-22",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/2/28/4clwisy16drv8tjlv7zu39dnqx8id9t.png/1200px-%E7%BB%AE%E8%89%AF%E8%89%AF%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "托马",
+    "nation": "稻妻",
+    "birthday": "01-09",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/1/17/s8loyv7uvtz9o9xyvi78motuuiyzf88.png/1200px-%E6%89%98%E9%A9%AC%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "梦见月瑞希",
+    "nation": "稻妻",
+    "birthday": "03-16",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/6/6f/l9s7pilrk0smm4fbc90rac1p0yxqqb9.png/1200px-%E6%A2%A6%E8%A7%81%E6%9C%88%E7%91%9E%E5%B8%8C%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "千织",
+    "nation": "稻妻",
+    "birthday": "08-17",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/6/6b/i4gqk9xqqpngo5z2yph372obd25qhju.png/1200px-%E5%8D%83%E7%BB%87%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "纳西妲",
+    "nation": "须弥",
+    "birthday": "10-27",
+    "image": "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/72bbf4182fb00050831eb3daeb3dc399_1448444344327077034.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp"
+  },
+  {
+    "name": "艾尔海森",
+    "nation": "须弥",
+    "birthday": "02-11",
+    "image": "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/ffb9b86bab7187fe710684d320ed340a_7328281658707313605.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp"
+  },
+  {
+    "name": "赛诺",
+    "nation": "须弥",
+    "birthday": "06-23",
+    "image": "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/923c436b0ae35c0ac892683591518c93_8701764055479519355.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp"
+  },
+  {
+    "name": "妮露",
+    "nation": "须弥",
+    "birthday": "12-03",
+    "image": "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/cc60b9185e07dea54e8b8d6740eba75d_7809319089813017104.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp"
+  },
+  {
+    "name": "坎蒂丝",
+    "nation": "须弥",
+    "birthday": "05-03",
+    "image": "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/9368ff9cdee75a750c91965109d558ee_5760647270758762717.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp"
+  },
+  {
+    "name": "柯莱",
+    "nation": "须弥",
+    "birthday": "05-08",
+    "image": "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/255a3cb2675060b9028e998db07ba3d7_2528032461505871833.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp"
+  },
+  {
+    "name": "提纳里",
+    "nation": "须弥",
+    "birthday": "12-29",
+    "image": "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/3b68f706a0bb82a594e2e6f745ce6f1b_4300386788035218940.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp"
+  },
+  {
+    "name": "多莉",
+    "nation": "须弥",
+    "birthday": "12-21",
+    "image": "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/5c61746469847501e4e64b714e21fa29_6539438103403154237.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp"
+  },
+  {
+    "name": "莱依拉",
+    "nation": "须弥",
+    "birthday": "12-19",
+    "image": "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/32fb51fc05a53c8b45b0ce874c7ecaa8_5949025011801073710.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp"
+  },
+  {
+    "name": "珐露珊",
+    "nation": "须弥",
+    "birthday": "08-20",
+    "image": "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/f6df28eb30a669dddf6c8c7ac6e54b26_9183613530230063316.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp"
+  },
+  {
+    "name": "卡维",
+    "nation": "须弥",
+    "birthday": "07-09",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/d/d8/k9sy7d8oy78ivgytnxe0hlz0w1sr9vi.png/1200px-%E5%8D%A1%E7%BB%B4%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "迪希雅",
+    "nation": "须弥",
+    "birthday": "04-07",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/8/83/46sk6niudrigkaco19g2cea3rz3lddj.png/1200px-%E8%BF%AA%E5%B8%8C%E9%9B%85%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "赛索斯",
+    "nation": "须弥",
+    "birthday": "05-31",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/2/2f/o6e3tvf3hpb4848bc6rtiwlo3cesuru.png/1200px-%E8%B5%9B%E7%B4%A2%E6%96%AF%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "流浪者",
+    "nation": "须弥",
+    "birthday": "01-03",
+    "image": "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/d12cf6d2d7c7affada976e70d10a0c50_5281066649940682533.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp"
+  },
+  {
+    "name": "芙宁娜",
+    "nation": "枫丹",
+    "birthday": "10-13",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/a/ac/4elolwtt2g03t8qbql9uuh6vzexv1jo.png/1200px-%E8%8A%99%E5%AE%81%E5%A8%9C%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "那维莱特",
+    "nation": "枫丹",
+    "birthday": "12-18",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/b/bb/q18lrpnhiaa2kextqc14p9j72xhls8y.png/1200px-%E9%82%A3%E7%BB%B4%E8%8E%B1%E7%89%B9%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "林尼",
+    "nation": "枫丹",
+    "birthday": "02-02",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/7/7f/qbhe0nettga7yfi97ndp6v79n1fz6xi.png/1200px-%E6%9E%97%E5%B0%BC%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "琳妮特",
+    "nation": "枫丹",
+    "birthday": "02-02",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/2/27/htqbidz6atrpb3k3y4q82ni8jehljzu.png/1200px-%E7%90%B3%E5%A6%AE%E7%89%B9%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "菲米尼",
+    "nation": "枫丹",
+    "birthday": "09-24",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/6/64/bpajsgn11yjfj2cype9ad0ezilx8yxm.png/1200px-%E8%8F%B2%E7%B1%B3%E5%B0%BC%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "娜维娅",
+    "nation": "枫丹",
+    "birthday": "08-16",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/a/ad/hhqtzmz7auhpr6uh071gzbdbcakghsk.png/1200px-%E5%A8%9C%E7%BB%B4%E5%A8%85%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "克洛琳德",
+    "nation": "枫丹",
+    "birthday": "09-20",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/9/99/lp20ww7qqzy8q6ctnam5q2fm6stegrp.png/1200px-%E5%85%8B%E6%B4%9B%E7%90%B3%E5%BE%B7%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "莱欧斯利",
+    "nation": "枫丹",
+    "birthday": "11-23",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/b/b3/2lbfry95afhdtr6sver177wr90ukpe1.png/1200px-%E8%8E%B1%E6%AC%A7%E6%96%AF%E5%88%A9%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "夏洛蒂",
+    "nation": "枫丹",
+    "birthday": "04-10",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/7/7d/h1dvbabbpt35oo3ils94hv21nbwz4fc.png/1200px-%E5%A4%8F%E6%B4%9B%E8%92%82%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "艾梅莉埃",
+    "nation": "枫丹",
+    "birthday": "09-22",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/6/61/tixmb998eyafd8tr6potqe5j3pt761b.png/1200px-%E8%89%BE%E6%A2%85%E8%8E%89%E5%9F%83%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "夏沃蕾",
+    "nation": "枫丹",
+    "birthday": "01-10",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/6/60/ctywsukka685asai2fxlwek40y978hp.png/1200px-%E5%A4%8F%E6%B2%83%E8%95%BE%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "希格雯",
+    "nation": "枫丹",
+    "birthday": "03-30",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/1/1d/sn839y70by5oxjpxb7d2ghrvrpg53lv.png/1200px-%E5%B8%8C%E6%A0%BC%E9%9B%AF%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "爱可菲",
+    "nation": "枫丹",
+    "birthday": "06-08",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/c/c7/37zfiao6sbm2zta7mvh2u56kr9sodiq.png/1200px-%E7%88%B1%E5%8F%AF%E8%8F%B2%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "玛薇卡",
+    "nation": "纳塔",
+    "birthday": "08-28",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/8/8d/kodchd9iqqn2hfq8b1cucckhpdcaqqi.png/1200px-%E7%8E%9B%E8%96%87%E5%8D%A1%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "基尼奇",
+    "nation": "纳塔",
+    "birthday": "11-11",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/1/19/baq5hhc6odttveep456o7u9kqdoivbm.png/1200px-%E5%9F%BA%E5%B0%BC%E5%A5%87%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "欧洛伦",
+    "nation": "纳塔",
+    "birthday": "10-14",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/5/5b/2yfuhrdg9kzoydt6szw614sexlitta5.png/1200px-%E6%AC%A7%E6%B4%9B%E4%BC%A6%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "玛拉妮",
+    "nation": "纳塔",
+    "birthday": "08-03",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/0/0e/6ytuso69fejc3fqy93jm37jauzn2zbc.png/1200px-%E7%8E%9B%E6%8B%89%E5%A6%AE%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "伊安珊",
+    "nation": "纳塔",
+    "birthday": "08-08",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/2/2e/jfqxgxu8dvtv2cp1x9o7zy91dvhyw9a.png/1200px-%E4%BC%8A%E5%AE%89%E7%8F%8A%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "恰斯卡",
+    "nation": "纳塔",
+    "birthday": "12-10",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/8/87/j4r7j7g6wlobhqlrbzt0yijq43y0nkz.png/1200px-%E6%81%B0%E6%96%AF%E5%8D%A1%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "瓦雷莎",
+    "nation": "纳塔",
+    "birthday": "11-15",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/c/c0/94m8ilmrjrzotugcmgmi3r69g7vcxpp.png/1200px-%E7%93%A6%E9%9B%B7%E8%8E%8E%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "希诺宁",
+    "nation": "纳塔",
+    "birthday": "03-13",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/2/21/r68ykvcqtsshriop2u7onp2euuh8ev8.png/1200px-%E5%B8%8C%E8%AF%BA%E5%AE%81%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "伊法",
+    "nation": "纳塔",
+    "birthday": "03-23",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/3/3f/3eooznddqyw7goq8pyj7uq8wgg8bk25.png/1200px-%E4%BC%8A%E6%B3%95%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "卡齐娜",
+    "nation": "纳塔",
+    "birthday": "04-22",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/6/6f/b0audskinp19xo7a9ti0exllkwv2vxg.png/1200px-%E5%8D%A1%E9%BD%90%E5%A8%9C%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "茜特菈莉",
+    "nation": "纳塔",
+    "birthday": "01-20",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/e/e0/srjrwy2mjj6raqil39tftplz86v5uvt.png/1200px-%E8%8C%9C%E7%89%B9%E8%8F%88%E8%8E%89%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "达达利亚",
+    "nation": "至冬",
+    "birthday": "07-20",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/5/5c/izckkan4xp0jipykwrotxw8slckyonw.png/1200px-%E8%BE%BE%E8%BE%BE%E5%88%A9%E4%BA%9A%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "阿蕾奇诺",
+    "nation": "至冬",
+    "birthday": "08-22",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/9/92/s3aeb46uh2ldeamwbg4zcag8vvjtbmc.png/1200px-%E9%98%BF%E8%95%BE%E5%A5%87%E8%AF%BA%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "桑多涅",
+    "nation": "至冬",
+    "birthday": "01-13",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/9/95/21afqdb120t02zyzrb1s5dt0mz43sqj.png/1920px-%E6%A1%91%E5%A4%9A%E6%B6%85%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "奥黛塔",
+    "nation": "至冬",
+    "birthday": "02-20",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/6/68/m06hi6a1xn161ykmewxne6y5dtg9ndm.png/1920px-%E5%A5%A5%E9%BB%9B%E5%A1%94%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "阿罗夏",
+    "nation": "至冬",
+    "birthday": "02-09",
+    "image": "https://patchwiki.biligame.com/images/ys/c/c1/sse18oo2pao9eajbzoml2v8r4notahp.png"
+  },
+  {
+    "name": "薇斯纳",
+    "nation": "至冬",
+    "birthday": "02-04",
+    "image": "https://patchwiki.biligame.com/images/ys/1/1c/2e5zygs40dugbzi9bjjvmw3vnayzqef.png"
+  },
+  {
+    "name": "沃雅妮莎",
+    "nation": "至冬",
+    "birthday": "03-29",
+    "image": "https://patchwiki.biligame.com/images/ys/5/5d/t96bz0psdgx9aai649uge4tpqj0mj88.png"
+  },
+  {
+    "name": "哥伦比娅",
+    "nation": "挪德卡莱",
+    "birthday": "01-14",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/7/7c/d4lmgkm6twg4wr7o1qitzecyga7gzkj.png/1200px-%E5%93%A5%E4%BC%A6%E6%AF%94%E5%A8%85%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "菲林斯",
+    "nation": "挪德卡莱",
+    "birthday": "10-31",
+    "image": "https://patchwiki.biligame.com/images/ys/0/01/7x5w5kr4mz62nyxxisvi9wm9dthn7rl.png"
+  },
+  {
+    "name": "菈乌玛",
+    "nation": "挪德卡莱",
+    "birthday": "03-10",
+    "image": "https://patchwiki.biligame.com/images/ys/8/8e/lpi0rxdt1srx5amlki12502tn2bnb6r.png"
+  },
+  {
+    "name": "爱诺",
+    "nation": "挪德卡莱",
+    "birthday": "09-21",
+    "image": "https://patchwiki.biligame.com/images/ys/5/51/4hzh7cmbq50nw87la981tp84ciafuof.png"
+  },
+  {
+    "name": "伊涅芙",
+    "nation": "挪德卡莱",
+    "birthday": "04-02",
+    "image": "https://patchwiki.biligame.com/images/ys/d/d6/74uqhk7rq0udthey661wlc3qafku4w4.png"
+  },
+  {
+    "name": "奈芙尔",
+    "nation": "挪德卡莱",
+    "birthday": "05-09",
+    "image": "https://patchwiki.biligame.com/images/ys/c/c8/01oe7symf354wrj344vd1o5n8it9iwo.png"
+  },
+  {
+    "name": "雅珂达",
+    "nation": "挪德卡莱",
+    "birthday": "01-05",
+    "image": "https://patchwiki.biligame.com/images/ys/f/f8/00lum9bzqtte2j02sjtmj012o7ncp2h.png"
+  },
+  {
+    "name": "莉奈娅",
+    "nation": "挪德卡莱",
+    "birthday": "05-23",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/f/f3/03dern5jtaybbkuh32oh6ygzxa4gbv1.png/1200px-%E8%8E%89%E5%A5%88%E5%A8%85%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "叶洛亚",
+    "nation": "挪德卡莱",
+    "birthday": "12-23",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/f/f6/qql6g1nn9d32neqrbvc0kftweotqoe0.png/1200px-%E5%8F%B6%E6%B4%9B%E4%BA%9A%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "埃洛伊",
+    "nation": "其他",
+    "birthday": "04-04",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/d/d4/c8i1nyrrh12e697sj221agawnx4gdkb.png/1200px-%E5%9F%83%E6%B4%9B%E4%BC%8A%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "丝柯克",
+    "nation": "其他",
+    "birthday": "11-05",
+    "image": "https://patchwiki.biligame.com/images/ys/thumb/d/d0/ehtz002534qqe7cfgtpxvbxir5b2oxg.png/1200px-%E4%B8%9D%E6%9F%AF%E5%85%8B%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+  },
+  {
+    "name": "尼可",
+    "nation": "其他",
+    "birthday": "09-29",
+    "image": "https://patchwiki.biligame.com/images/ys/c/cb/q71jqsy9wye69pzzpezj3sa6at8gnhz.png"
+  }
+];
 
-      // ====================== 通用工具函数 ======================
-      function formatTime(date) {
-        const year = date.getFullYear();
-        const month = date.getMonth() + 1;
-        const day = date.getDate();
-        const hour = String(date.getHours()).padStart(2, "0");
-        const minute = String(date.getMinutes()).padStart(2, "0");
-        const second = String(date.getSeconds()).padStart(2, "0");
-        const weekdays = [
-          "星期日",
-          "星期一",
-          "星期二",
-          "星期三",
-          "星期四",
-          "星期五",
-          "星期六",
-        ];
-        const weekday = weekdays[date.getDay()];
-        return `${year}年${month}月${day}日 ${weekday} ${hour}:${minute}:${second}`;
+const MONTHS = ["一月","二月","三月","四月","五月","六月","七月","八月","九月","十月","十一月","十二月"];
+let heroPool=null, heroIdx=0;
+const ROLE_NO=new Map();
+const NATION_RGB = {
+  "蒙德":"66,179,189","璃月":"230,192,122","稻妻":"167,107,199","须弥":"134,184,79",
+  "枫丹":"95,168,211","纳塔":"226,122,78","至冬":"115,198,217","挪德卡莱":"120,130,168","其他":"124,58,237"
+};
+const FALLBACK = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(
+  '<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300"><rect width="100%" height="100%" fill="#1a1a22"/><text x="50%" y="54%" font-size="52" text-anchor="middle" dominant-baseline="middle" fill="#5c5c66">?</text></svg>'
+);
+
+/* ====================== 倒计时核心（闰年/跨天/同日多角色） ====================== */
+function isLeap(y){return (y%4===0&&y%100!==0)||y%400===0}
+/* 自然日差：以「今天」0 点为锚点，算到「目标日」0 点还差几个自然日。
+   例：今天 06-16 上午、目标 06-18 → 还有 2 天（2 个自然日）；目标今天 → 0 天。
+   这里刻意用「日历日差」而不是毫秒/86400000 向上取整，避免出现 1 天 2 小时被算成 2 天的偏差。 */
+function daysBetween(now, target){
+  const a = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  const b = new Date(target.getFullYear(), target.getMonth(), target.getDate()).getTime();
+  return Math.round((b - a) / 864e5);
+}
+function getDetail(b, now){
+  if(b==="???") return {unknown:true,isToday:false,isSoon:false,days:365,text:"生日未知",date:"未知"};
+  now = now || new Date();
+  const [m,d]=b.split("-").map(Number), y=now.getFullYear();
+  const tm=now.getMonth()+1, td=now.getDate();
+  let isToday, next;
+  if(m===2&&d===29){
+    isToday=tm===2&&td===29;
+    if(isToday||(isLeap(y)&&new Date(y,1,29)>=now))next=new Date(y,1,29);
+    if(!next||next<now){let ly=y+1;while(!isLeap(ly))ly++;next=new Date(ly,1,29)}
+  }else{
+    isToday=m===tm&&d===td;
+    next=new Date(y,m-1,d);
+    if(!isToday&&next<now)next=new Date(y+1,m-1,d);
+  }
+  const ms=next-now;
+  const days=daysBetween(now, next);
+  const pad=n=>String(n).padStart(2,"0");
+  const h=Math.floor(ms/36e5)%24, mi=Math.floor(ms/6e4)%60, s=Math.floor(ms/1e3)%60;
+  const text=isToday?"就是今天 🎉"
+    :days+"d "+pad(h)+":"+pad(mi)+":"+pad(s);
+  return {
+    isToday, isSoon:!isToday&&days>0&&days<=15, days, text,
+    h, mi, s, date:m+"月"+d+"日"
+  };
+}
+
+/* ====================== Hero：字符级滚动倒计时 ====================== */
+let heroRole=null;
+function pickHero(){
+  const pool=allRoleList.filter(r=>r.birthday!=="???").map(r=>({r,d:getDetail(r.birthday)}));
+  const today=pool.filter(x=>x.d.isToday);
+  heroPool=today.length?today:pool.filter(x=>x.d.days>0).sort((a,b)=>a.d.days-b.d.days);
+  heroIdx=0;
+  renderHero();
+}
+function renderHero(){
+  if(!heroPool||!heroPool.length)return;
+  heroIdx=(heroIdx+heroPool.length)%heroPool.length;
+  const {r,d}=heroPool[heroIdx];
+  heroRole=heroPool[heroIdx];
+  document.getElementById("heroName").textContent=r.name;
+  document.getElementById("heroMeta").innerHTML=
+    '<span class="tag brand">'+r.nation+'</span><span class="tag mono">'+d.date+'</span>'
+    +(d.isToday?'<span class="tag brand" style="border-style:dashed">TODAY 🎉</span>':'');
+  const fig=document.getElementById("heroFig");
+  const img=document.getElementById("heroImg");
+  fig.style.visibility="visible";
+  img.classList.remove("ld"); img.src=r.image; img.alt=r.name;
+  const badge=document.getElementById("heroBadge");
+  badge.textContent=d.isToday?"TODAY":"NEXT";
+  /* 同一天多位角色过生日时，Hero 每 4 秒轮播，并给提示 */
+  const note=document.getElementById("heroNote");
+  if(note){
+    if(heroPool.length>1&&heroPool[0].d.isToday){
+      badge.textContent="TODAY · "+(heroIdx+1)+"/"+heroPool.length;
+      note.textContent="今日有 "+heroPool.length+" 位旅伴生日 · 4 秒轮播中";
+    }else{
+      note.textContent="全站倒计时每秒自动刷新 · 跨午夜自动更新";
+    }
+  }
+  buildCount(d);
+}
+function buildCount(d){
+  const box=document.getElementById("heroCount");
+  if(d.isToday){box.innerHTML='<div class="cg"><span class="cd-ch" style="font-size:clamp(2rem,6vw,3.6rem)">就是今天 🎉</span></div>';return}
+  const parts=[["DAYS",d.days],["HRS",d.h],["MIN",d.mi],["SEC",d.s]];
+  box.innerHTML=parts.map((p,i)=>
+    '<div class="cg"><div class="cd">'
+    +String(p[1]).padStart(2,"0").split("").map(c=>'<span class="cd-ch">'+c+'</span>').join("")
+    +'</div><label>'+p[0]+'</label></div>'
+    +(i<3?'<span class="cd-sep" style="margin-top:0">:</span>':'')
+  ).join("");
+}
+function tickCount(){
+  if(!heroRole)return;
+  const d=getDetail(heroRole.r.birthday);
+  if(d.isToday!==heroRole.d.isToday){pickHero();return}
+  if(d.isToday){buildCount(d);return}
+  const box=document.getElementById("heroCount");
+  const groups=box.querySelectorAll(".cg");
+  const vals=[d.days,d.h,d.mi,d.s];
+  groups.forEach((g,gi)=>{
+    const spans=g.querySelectorAll(".cd-ch");
+    const str=String(vals[gi]).padStart(2,"0");
+    if(spans.length!==str.length){
+      g.querySelector(".cd").innerHTML=str.split("").map(c=>'<span class="cd-ch">'+c+'</span>').join("");
+      return;
+    }
+    const isSec=gi===3;
+    const cls=isSec?"tick-sec":"tick";
+    str.split("").forEach((c,i)=>{
+      if(spans[i].textContent!==c){
+        spans[i].textContent=c;
+        spans[i].classList.remove("tick","tick-sec");void spans[i].offsetWidth;spans[i].classList.add(cls);
       }
+    });
+  });
+}
 
-      function isLeapYear(year) {
-        return (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
-      }
+/* ====================== 今日横幅 ====================== */
+function renderToday(){
+  const box=document.getElementById("todayBox");
+  const today=allRoleList.filter(r=>r.birthday!=="???"&&getDetail(r.birthday).isToday);
+  if(today.length){
+    box.innerHTML='<span class="today-pill">TODAY</span><div class="today-who">'
+      +today.map(r=>'<span>'+r.name+'</span>·'+r.birthday.replace("-","/")).join("&nbsp;&nbsp;")+'</div>'
+      +(today.length>1?'<span class="today-badge">'+today.length+' 位旅伴同天生日</span>':'');
+  }else{
+    const next=heroPool&&heroPool.length?heroPool[0]:null;
+    box.innerHTML='<span class="today-none">今日无人生日 — '
+      +(next?'下一位是 <span class="today-next">'+next.r.name+'</span>（'+next.d.days+' 天后）':'看看接下来谁将至。')+'</span>';
+  }
+}
 
-      // 还原：移除2月29日特殊文案
-      function getCountdownDetail(birthdayStr) {
-        const [bMonth, bDay] = birthdayStr.split("-").map(Number);
-        const now = new Date();
-        const currentYear = now.getFullYear();
-        const todayMonth = now.getMonth() + 1;
-        const todayDay = now.getDate();
-        let nextBirthday;
-        let isBirthdayToday = false;
+/* ====================== 年鉴网格 ====================== */
+function renderAlmanac(){
+  const box=document.getElementById("almanac");
+  const frag=document.createDocumentFragment();
+  for(let m=1;m<=12;m++){
+    const list=allRoleList.filter(r=>r.birthday!=="???"&&+r.birthday.split("-")[0]===m);
+    if(!list.length)continue;
+    const sec=document.createElement("section");
+    sec.className="month";sec.id="m"+m;
+    const soon=list.map(r=>({r,d:getDetail(r.birthday)})).filter(x=>x.d.isSoon||x.d.isToday).length;
+    sec.innerHTML='<header class="month-head"><span class="month-no">'+String(m).padStart(2,"0")
+      +'</span><span class="month-name">'+MONTHS[m-1]+'</span><span class="month-cnt">'
+      +list.length+' PEOPLE</span><span class="month-rule"></span>'
+      +(soon?'<span class="month-next">● '+soon+' approaching</span>':'')+'</header>';
+    const grid=document.createElement("div");
+    grid.className="month-grid";
+    list.forEach(r=>{
+      const d=getDetail(r.birthday);
+      const el=document.createElement("article");
+      el.className="card rise"+(d.isToday?" today":"")+(d.isSoon?" soon":"");
+      el.dataset.nation=r.nation;
+      el.innerHTML=
+        (d.isToday?'<span class="stamp">TODAY</span>':d.isSoon?'<span class="stamp">SOON</span>':'')
+        +'<div class="card-img"><img src="'+r.image+'" alt="'+r.name+'" loading="lazy" decoding="async"></div>'
+        +'<div class="card-body"><div class="card-top">'
+        +'<span class="card-nat">'+r.nation+'</span></div><h3>'+r.name+'</h3>'
+        +'<div class="card-date">'+r.birthday.replace("-"," · ")+'</div>'
+        +'<div class="card-cd" data-b="'+r.birthday+'">'+d.text+'</div></div>';
+      grid.appendChild(el);
+    });
+    sec.appendChild(grid);
+    frag.appendChild(sec);
+  }
+  box.appendChild(frag);
+  /* 未分类（???）如有则附加 */
+}
 
-        if (bMonth === 2 && bDay === 29) {
-          isBirthdayToday = todayMonth === 2 && todayDay === 29;
-        } else {
-          isBirthdayToday = bMonth === todayMonth && bDay === todayDay;
-        }
+/* ====================== 过滤（带重播入场动画） ====================== */
+let cur="全部";
+function renderFilters(){
+  const counts={};allRoleList.forEach(r=>counts[r.nation]=(counts[r.nation]||0)+1);
+  const items=["全部","蒙德","璃月","稻妻","须弥","枫丹","纳塔","至冬","挪德卡莱","其他"];
+  const bar=document.getElementById("filters");
+  bar.innerHTML='<span class="hint">REGION</span>'+items.map(n=>
+    '<button class="pill'+(n===cur?" on":"")+'" data-n="'+n+'">'+n+'<i>'+(n==="全部"?allRoleList.length:counts[n])+'</i></button>'
+  ).join("");
+  bar.addEventListener("click",e=>{
+    const p=e.target.closest(".pill");if(!p)return;
+    cur=p.dataset.n;
+    bar.querySelectorAll(".pill").forEach(b=>b.classList.toggle("on",b===p));
+    applyFilter(true);
+  });
+}
+function applyFilter(animate){
+  document.querySelectorAll(".card").forEach(el=>{
+    el.classList.toggle("hide",cur!=="全部"&&el.dataset.nation!==cur);
+    if(animate&&!el.classList.contains("hide")){
+      el.style.animation="none";void el.offsetWidth;
+      el.style.animation="";el.classList.remove("in");
+      void el.offsetWidth;el.classList.add("in");
+    }
+  });
+  document.querySelectorAll(".month").forEach(sec=>{
+    sec.classList.toggle("hide",!sec.querySelector(".card:not(.hide)"));
+  });
+  const rgb=NATION_RGB[cur];
+  /* 「全部」时不覆盖 --brand，让明暗主题各自默认色生效（浅色是 #6d4dff，暗色是 #8b6cff） */
+  if(rgb){
+    document.documentElement.style.setProperty("--brand","rgb("+rgb+")");
+    document.documentElement.style.setProperty("--brand-rgb",rgb);
+    document.documentElement.style.setProperty("--brand-soft","rgba("+rgb+",.12)");
+  }else{
+    document.documentElement.style.removeProperty("--brand");
+    document.documentElement.style.removeProperty("--brand-rgb");
+    document.documentElement.style.removeProperty("--brand-soft");
+  }
+}
 
-        if (bMonth === 2 && bDay === 29) {
-          if (isBirthdayToday) {
-            nextBirthday = new Date(currentYear, 1, 29);
-          } else if (isLeapYear(currentYear)) {
-            nextBirthday = new Date(currentYear, 1, 29);
-            if (nextBirthday < now) {
-              let nextLeapYear = currentYear + 1;
-              while (!isLeapYear(nextLeapYear)) nextLeapYear++;
-              nextBirthday = new Date(nextLeapYear, 1, 29);
-            }
-          } else {
-            let nextLeapYear = currentYear + 1;
-            while (!isLeapYear(nextLeapYear)) nextLeapYear++;
-            nextBirthday = new Date(nextLeapYear, 1, 29);
-          }
-        } else {
-          if (isBirthdayToday) {
-            nextBirthday = new Date(currentYear, bMonth - 1, bDay);
-          } else {
-            nextBirthday = new Date(currentYear, bMonth - 1, bDay);
-            if (nextBirthday < now) {
-              nextBirthday.setFullYear(currentYear + 1);
-            }
-          }
-        }
+/* ====================== 卡片微交互：光泽跟随 + 3D 倾斜 ====================== */
+const isTouch=matchMedia("(pointer:coarse)").matches;
+function initCardFX(){
+  let raf=0, lastEv=null;
+  function apply(){
+    raf=0;
+    const e=lastEv; lastEv=null;
+    if(!e||isTouch)return;
+    const c=e.target.closest(".card");
+    if(!c)return;
+    const r=c.getBoundingClientRect();
+    c.style.setProperty("--mx",(e.clientX-r.left)+"px");
+    c.style.setProperty("--my",(e.clientY-r.top)+"px");
+    const rx=((e.clientY-r.top)/r.height-.5)*-4, ry=((e.clientX-r.left)/r.width-.5)*5;
+    c.style.transform="perspective(900px) rotateX("+rx+"deg) rotateY("+ry+"deg) translateY(-3px)";
+  }
+  document.addEventListener("mousemove",e=>{
+    if(isTouch)return;
+    lastEv=e;
+    if(!raf)raf=requestAnimationFrame(apply);
+  },{passive:true});
+  document.addEventListener("mouseout",e=>{
+    const c=e.target.closest(".card");
+    if(c)c.style.transform="";
+  },{passive:true});
+}
 
-        const diffMs = nextBirthday - now;
-        const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
-        const isToday = isBirthdayToday;
-        const isWithin15Days = diffDays <= 15 && diffDays > 0;
+/* ====================== 图片揭示 + 兜底 ====================== */
+function markLoaded(img){
+  if(img.complete&&img.naturalWidth>0){img.classList.add("ld");return}
+  img.addEventListener("load",()=>img.classList.add("ld"),{once:true});
+}
+document.addEventListener("error",e=>{
+  const t=e.target;
+  if(t&&t.tagName==="IMG"&&!t.dataset.fb){t.dataset.fb="1";t.src=FALLBACK;t.classList.add("ld")}
+},true);
 
-        let countdownText;
-        if (isToday) {
-          countdownText = "就是今天🎉";
-        } else {
-          const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-          const hours = Math.floor(
-            (diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
-          );
-          const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-          const seconds = Math.floor((diffMs % (1000 * 60)) / 1000);
-          countdownText = `${days}天${hours}小时${minutes}分钟${seconds}秒`;
-        }
+/* ====================== 渐显 ====================== */
+function initReveal(){
+  const els=[...document.querySelectorAll(".rise")];
+  if(!("IntersectionObserver" in window)){els.forEach(el=>el.classList.add("in"));return}
+  const io=new IntersectionObserver(es=>{
+    es.forEach(en=>{if(en.isIntersecting){en.target.classList.add("in");io.unobserve(en.target)}})
+  },{threshold:.06});
+  els.forEach(el=>io.observe(el));
+}
 
-        return {
-          days: diffDays,
-          isToday: isToday,
-          isWithin15Days: isWithin15Days,
-          countdownText: countdownText,
-          date: `${bMonth}月${bDay}日`,
-          nextBirthday: nextBirthday,
-        };
-      }
+/* ====================== 时钟 / 每秒 / 跨天 ====================== */
+let dayStamp=new Date().toDateString();
+let tickN=0;
+function tick(){
+  const n=new Date();
+  const wd=["日","一","二","三","四","五","六"][n.getDay()];
+  document.getElementById("clock").textContent=
+    n.getFullYear()+"/"+String(n.getMonth()+1).padStart(2,"0")+"/"+String(n.getDate()).padStart(2,"0")
+    +" 周"+wd+" "+String(n.getHours()).padStart(2,"0")+":"+String(n.getMinutes()).padStart(2,"0")+":"+String(n.getSeconds()).padStart(2,"0");
+  tickN++;
+  /* 时钟每秒走，倒计时数值每 2 秒刷新一次（肉眼几乎看不出差异，计算量减半） */
+  if(tickN%2===0){
+    document.querySelectorAll(".card-cd[data-b]").forEach(el=>{
+      el.textContent=getDetail(el.dataset.b, n).text;
+    });
+    tickCount();
+    /* 同一天多角色过生日时，Hero 每 4 秒轮换一位 */
+    if(heroPool&&heroPool.length>1&&heroPool[0].d.isToday&&tickN%4===0){
+      heroIdx=(heroIdx+1)%heroPool.length;
+      renderHero();
+    }
+  }
+  if(n.toDateString()!==dayStamp){dayStamp=n.toDateString();pickHero();renderToday();
+    document.querySelectorAll(".card").forEach(el=>{
+      const d=getDetail(el.querySelector(".card-cd").dataset.b, n);
+      el.classList.toggle("today",d.isToday);el.classList.toggle("soon",d.isSoon);
+    });
+  }
+}
 
-      function formatBirthdayMMDD(birthdayStr) {
-        const [month, day] = birthdayStr
-          .split("-")
-          .map((num) => num.padStart(2, "0"));
-        return `${month}-${day}`;
-      }
+/* ====================== 主题切换 ====================== */
+function initTheme(){
+  const saved=localStorage.getItem("t-bd-theme");
+  if(saved==="light")document.documentElement.dataset.theme="light";
+  syncIcon();
+  document.getElementById("themeBtn").addEventListener("click",()=>{
+    const el=document.documentElement;
+    el.dataset.theme=el.dataset.theme==="light"?"":"light";
+    localStorage.setItem("t-bd-theme",el.dataset.theme||"dark");
+    syncIcon();
+  });
+  function syncIcon(){
+    /* 图标切换交给 CSS 透明度 + 旋转过渡，避免 display:none 硬切 */
+    const light=document.documentElement.dataset.theme==="light";
+    document.getElementById("iconMoon").setAttribute("aria-hidden",light?"true":"false");
+    document.getElementById("iconSun").setAttribute("aria-hidden",light?"false":"true");
+  }
+}
 
-      function isTouchDevice() {
-        return "ontouchstart" in window || navigator.maxTouchPoints > 0;
-      }
-
-      function initCardInteraction(containerSelector = "") {
-        // 触屏设备关闭 3D 倾斜，避免干扰触摸滚动
-        if (isTouchDevice()) return;
-
-        const elements = document.querySelectorAll(
-          `${containerSelector} .original-card, ${containerSelector} .card`,
-        );
-        const sensitivity = 40;
-
-        elements.forEach((element) => {
-          element.removeEventListener("mousemove", handleMouseMove);
-          element.removeEventListener("mouseleave", handleMouseLeave);
-          element.removeEventListener("mouseenter", handleMouseEnter);
-          element.addEventListener("mousemove", handleMouseMove);
-          element.addEventListener("mouseleave", handleMouseLeave);
-          element.addEventListener("mouseenter", handleMouseEnter);
-        });
-
-        function handleMouseMove(e) {
-          const rect = e.currentTarget.getBoundingClientRect();
-          const x = e.clientX - rect.left;
-          const y = e.clientY - rect.top;
-          const relativeX = x / rect.width - 0.5;
-          const relativeY = y / rect.height - 0.5;
-          const rotateY = relativeX * sensitivity;
-          const rotateX = -relativeY * sensitivity;
-          e.currentTarget.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.05, 1.05, 1.05)`;
-        }
-
-        function handleMouseLeave(e) {
-          e.currentTarget.style.transform =
-            "perspective(1000px) rotateX(0) rotateY(0) scale3d(1, 1, 1)";
-        }
-
-        function handleMouseEnter(e) {
-          e.currentTarget.style.transform =
-            "perspective(1000px) rotateX(0) rotateY(0) scale3d(1.05, 1.05, 1.05)";
-        }
-      }
-
-      function hexToRgbValues(hex) {
-        const r = parseInt(hex.slice(1, 3), 16);
-        const g = parseInt(hex.slice(3, 5), 16);
-        const b = parseInt(hex.slice(5, 7), 16);
-        return { r, g, b };
-      }
-
-      function setTheme(nation) {
-        const root = document.documentElement;
-        if (!nation) {
-          root.style.setProperty("--primary-color", "#8A5CF6");
-          root.style.setProperty("--primary-rgb", "138, 92, 246");
-          root.style.setProperty("--bg-main", "#121826");
-          root.style.setProperty("--bg-sidebar", "rgba(18, 24, 38, 0.88)");
-          root.style.setProperty("--bg-card", "rgba(30, 35, 48, 0.75)");
-          root.style.setProperty("--card-bg", "rgba(255, 255, 255, 0.08)");
-          root.style.setProperty("--text-main", "#F8FAFC");
-          root.style.setProperty("--text-secondary", "#94A3B8");
-          root.style.setProperty("--border-color", "rgba(138, 92, 246, 0.25)");
-          root.style.setProperty("--hover-bg", "rgba(138, 92, 246, 0.1)");
-          root.style.setProperty("--shadow", "0 4px 20px rgba(0, 0, 0, 0.4)");
-          root.style.setProperty("--nav-text-color", "#E2E8F0");
-          return;
-        }
-        const { r, g, b } = hexToRgbValues(nation.bg);
-        const primaryRgb = hexToRgbValues(nation.primary);
-        const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
-        const isLightBackground = luminance > 128;
-        root.style.setProperty("--primary-color", nation.primary);
-        root.style.setProperty(
-          "--primary-rgb",
-          `${primaryRgb.r}, ${primaryRgb.g}, ${primaryRgb.b}`,
-        );
-        root.style.setProperty("--bg-main", nation.bg);
-        root.style.setProperty("--bg-sidebar", `rgba(${r}, ${g}, ${b}, 0.88)`);
-        root.style.setProperty("--bg-card", "rgba(30, 35, 48, 0.75)");
-        root.style.setProperty("--card-bg", "rgba(255, 255, 255, 0.08)");
-
-        if (isLightBackground) {
-          root.style.setProperty("--text-main", "#0f172a");
-          root.style.setProperty("--text-secondary", "#334155");
-          root.style.setProperty("--nav-text-color", "#1e293b");
-          root.style.setProperty("--bg-card", "rgba(255, 255, 255, 0.8)");
-          root.style.setProperty("--card-bg", "rgba(0, 0, 0, 0.05)");
-          root.style.setProperty("--border-color", "rgba(0, 0, 0, 0.1)");
-          root.style.setProperty("--hover-bg", "rgba(0, 0, 0, 0.06)");
-          root.style.setProperty("--shadow", "0 4px 20px rgba(0, 0, 0, 0.1)");
-        } else {
-          root.style.setProperty("--text-main", "#f1f5f9");
-          root.style.setProperty("--text-secondary", "#cbd5e1");
-          root.style.setProperty("--nav-text-color", "#e2e8f0");
-          root.style.setProperty("--bg-card", "rgba(30, 41, 59, 0.8)");
-          root.style.setProperty("--card-bg", "rgba(255, 255, 255, 0.08)");
-          root.style.setProperty(
-            "--border-color",
-            `rgba(${r}, ${g}, ${b}, 0.3)`,
-          );
-          root.style.setProperty("--hover-bg", "rgba(255, 255, 255, 0.08)");
-          root.style.setProperty("--shadow", "0 4px 20px rgba(0, 0, 0, 0.3)");
-        }
-      }
-
-      // ====================== 页面渲染函数 ======================
-      function renderTodayBirthday() {
-        const container = document.getElementById("todayBirthdayGrid");
-        const todayRoles = allRoleList.filter((role) => {
-          const detail = getCountdownDetail(role.birthday);
-          return detail.isToday;
-        });
-        if (todayRoles.length === 0) {
-          container.innerHTML =
-            '<div class="empty-tip">今天暂无角色过生日，快去看看即将到来的生日吧~</div>';
-          return;
-        }
-        container.innerHTML = "";
-        todayRoles.forEach((role) => {
-          const formattedBirthday = formatBirthdayMMDD(role.birthday);
-          const card = document.createElement("article");
-          card.className = "original-card today-card";
-          card.innerHTML = `
-                    <img src="${role.image}" alt="${role.name}" loading="lazy" decoding="async">
-                    <h3>${role.name} ${formattedBirthday}</h3>
-                    <div class="countdown-label">距离生日</div>
-                    <div class="countdown-time" data-birthday="${role.birthday}">就是今天🎉</div>
-                `;
-          container.appendChild(card);
-        });
-        initCardInteraction("#todayBirthdayGrid");
-      }
-
-      function renderUpcomingBirthday() {
-        const container = document.getElementById("upcomingBirthdayGrid");
-        const upcomingRoles = allRoleList
-          .filter((role) => {
-            const detail = getCountdownDetail(role.birthday);
-            return detail.isWithin15Days;
-          })
-          .sort((a, b) => {
-            return (
-              getCountdownDetail(a.birthday).days -
-              getCountdownDetail(b.birthday).days
-            );
-          });
-        if (upcomingRoles.length === 0) {
-          container.innerHTML =
-            '<div class="empty-tip">未来15天暂无角色生日</div>';
-          return;
-        }
-        container.innerHTML = "";
-        upcomingRoles.forEach((role) => {
-          const formattedBirthday = formatBirthdayMMDD(role.birthday);
-          const detail = getCountdownDetail(role.birthday);
-          const card = document.createElement("article");
-          card.className = "original-card";
-          card.innerHTML = `
-                    <img src="${role.image}" alt="${role.name}" loading="lazy" decoding="async">
-                    <h3>${role.name} ${formattedBirthday}</h3>
-                    <div class="countdown-label">距离生日还有</div>
-                    <div class="countdown-time" data-birthday="${role.birthday}">${detail.countdownText}</div>
-                `;
-          container.appendChild(card);
-        });
-        initCardInteraction("#upcomingBirthdayGrid");
-      }
-
-      function renderNavList() {
-        const navList = document.getElementById("navList");
-        nationList.forEach((nation) => {
-          const navItem = document.createElement("div");
-          navItem.className = "nav-item";
-          navItem.setAttribute("data-hash", nation.hash);
-          navItem.innerHTML = `
-                    <span class="icon">${nationIcons[nation.hash] || ""}</span>
-                    <span>${nation.name}</span>
-                `;
-          navList.appendChild(navItem);
-        });
-      }
-
-      // ====================== 地区模块工厂函数 ======================
-      function createNationModule(nationKey, characters) {
-        return {
-          characters: characters,
-          preloadImages() {
-            this.characters.forEach((char) => {
-              const img = new Image();
-              img.src = char.image;
-            });
-          },
-          updateRealTime() {
-            const now = new Date();
-            document.getElementById(`${nationKey}-realTime`).textContent =
-              formatTime(now);
-          },
-          renderCharacters(list = this.characters) {
-            const container = document.getElementById(
-              `${nationKey}-characterGrid`,
-            );
-            container.innerHTML = "";
-            list.forEach((char, index) => {
-              const card = document.createElement("article");
-              card.className = "card original-card glass-item";
-              card.dataset.name = char.name.toLowerCase();
-              if (char.birthday === "???") {
-                card.innerHTML = `
-                                <img src="${char.image}" alt="${char.name}" loading="lazy" decoding="async">
-                                <h3>${char.name}</h3>
-                                <div class="countdown-time">${char.note || "生日未知"}</div>
-                            `;
-                container.appendChild(card);
-                return;
-              }
-              const formattedBirthday = formatBirthdayMMDD(char.birthday);
-              const isToday = getCountdownDetail(char.birthday).isToday;
-              const countdownText = getCountdownDetail(
-                char.birthday,
-              ).countdownText;
-              card.innerHTML = `
-                            <img src="${char.image}" alt="${char.name}" loading="lazy" decoding="async">
-                            <h3>${char.name} ${formattedBirthday}</h3>
-                            <div class="countdown-label">距离生日还有</div>
-                            <div class="countdown-time" data-index="${index}">${countdownText}</div>
-                        `;
-              if (isToday) card.classList.add("today-card");
-              container.appendChild(card);
-            });
-            initCardInteraction(`#${nationKey}-panel`);
-          },
-          updateCountdowns() {
-            this.characters.forEach((char, index) => {
-              const countdownEl = document.querySelector(
-                `#${nationKey}-panel .countdown-time[data-index="${index}"]`,
-              );
-              if (!countdownEl) return;
-
-              if (char.birthday === "???") {
-                countdownEl.textContent = char.note || "生日未知";
-                return;
-              }
-
-              countdownEl.textContent = getCountdownDetail(
-                char.birthday,
-              ).countdownText;
-              const card = countdownEl.closest(".card");
-              if (getCountdownDetail(char.birthday).isToday) {
-                card.classList.add("today-card");
-              } else {
-                card.classList.remove("today-card");
-              }
-            });
-          },
-          init() {
-            this.preloadImages();
-            this.updateRealTime();
-            this.renderCharacters();
-          },
-        };
-      }
-
-      // ====================== 地区模块初始化 ======================
-      const mondstadtModule = createNationModule(
-        "mondstadt",
-        allRoleList.filter((role) => role.nation === "蒙德"),
-      );
-      const liyueModule = createNationModule(
-        "liyue",
-        allRoleList.filter((role) => role.nation === "璃月"),
-      );
-      const inazumaModule = createNationModule(
-        "inazuma",
-        allRoleList.filter((role) => role.nation === "稻妻"),
-      );
-      const sumeruModule = createNationModule(
-        "sumeru",
-        allRoleList.filter((role) => role.nation === "须弥"),
-      );
-      const fontaineModule = createNationModule(
-        "fontaine",
-        allRoleList.filter((role) => role.nation === "枫丹"),
-      );
-      const natlanModule = createNationModule(
-        "natlan",
-        allRoleList.filter((role) => role.nation === "纳塔"),
-      );
-      const snezhnayaModule = createNationModule(
-        "snezhnaya",
-        allRoleList.filter((role) => role.nation === "至冬"),
-      );
-      const nodkraiModule = createNationModule(
-        "nodkrai",
-        allRoleList.filter((role) => role.nation === "挪德卡莱"),
-      );
-      const beyondtheworldModule = createNationModule(
-        "beyondtheworld",
-        allRoleList.filter((role) => role.nation === "其他"),
-      );
-
-      const allModules = {
-        mondstadt: mondstadtModule,
-        liyue: liyueModule,
-        inazuma: inazumaModule,
-        sumeru: sumeruModule,
-        fontaine: fontaineModule,
-        natlan: natlanModule,
-        snezhnaya: snezhnayaModule,
-        nodkrai: nodkraiModule,
-        beyondtheworld: beyondtheworldModule,
-      };
-
-      // ====================== 路由处理函数 ======================
-      function handleRoute() {
-        const hash = window.location.hash.slice(1) || "home";
-        const navItems = document.querySelectorAll(".nav-item");
-        const pagePanels = document.querySelectorAll(".page-panel");
-        const hamburgerBtn = document.getElementById("hamburgerBtn");
-        const sidebar = document.getElementById("sidebar");
-
-        navItems.forEach((item) => item.classList.remove("active"));
-        pagePanels.forEach((panel) => panel.classList.remove("active"));
-
-        const activeNavItem = document.querySelector(
-          `.nav-item[data-hash="${hash}"]`,
-        );
-        if (activeNavItem) activeNavItem.classList.add("active");
-
-        if (hash === "home") {
-          document.getElementById("home-panel").classList.add("active");
-          setTheme(null);
-          document.title = "原神角色生日倒计时 - 提瓦特全地区";
-          renderTodayBirthday();
-          renderUpcomingBirthday();
-          lastHomeRenderDate = new Date().toDateString();
-        } else {
-          const targetNation = nationList.find(
-            (nation) => nation.hash === hash,
-          );
-          if (targetNation) {
-            document.getElementById(`${hash}-panel`).classList.add("active");
-            setTheme(targetNation);
-            if (allModules[hash]) allModules[hash].init();
-            document.title = `${targetNation.name}角色生日倒计时`;
-          } else {
-            window.location.hash = "home";
-          }
-        }
-
-        sidebar.classList.remove("open");
-        hamburgerBtn.classList.remove("hidden");
-      }
-
-      // ====================== 移动端侧边栏交互 ======================
-      function initMobileSidebar() {
-        const hamburgerBtn = document.getElementById("hamburgerBtn");
-        const sidebar = document.getElementById("sidebar");
-        const overlay = document.getElementById("sidebarOverlay");
-        const mainContainer = document.querySelector(".main-container");
-        const navList = document.getElementById("navList");
-
-        function toggleSidebar(open) {
-          const isOpen =
-            open !== undefined ? open : !sidebar.classList.contains("open");
-          sidebar.classList.toggle("open", isOpen);
-          overlay.classList.toggle("active", isOpen);
-          hamburgerBtn.classList.toggle("hidden", isOpen);
-          hamburgerBtn.setAttribute("aria-expanded", isOpen);
-          hamburgerBtn.setAttribute(
-            "aria-label",
-            isOpen ? "关闭导航菜单" : "打开导航菜单",
-          );
-          document.body.style.overflow = isOpen ? "hidden" : "";
-        }
-
-        hamburgerBtn.addEventListener("click", () => toggleSidebar());
-
-        overlay.addEventListener("click", () => toggleSidebar(false));
-
-        navList.addEventListener("click", (e) => {
-          if (e.target.closest(".nav-item") && window.innerWidth <= 1024) {
-            toggleSidebar(false);
-          }
-        });
-
-        mainContainer.addEventListener("click", () => {
-          if (sidebar.classList.contains("open") && window.innerWidth <= 1024) {
-            toggleSidebar(false);
-          }
-        });
-
-        window.addEventListener("resize", () => {
-          if (window.innerWidth > 1024) {
-            if (sidebar.classList.contains("open")) toggleSidebar(false);
-            hamburgerBtn.classList.add("hidden");
-          } else {
-            if (!sidebar.classList.contains("open")) {
-              hamburgerBtn.classList.remove("hidden");
-            }
-          }
-        });
-      }
-
-      // ====================== 全局初始化 ======================
-      renderNavList();
-      initMobileSidebar();
-
-      document.addEventListener("click", (e) => {
-        const navItem = e.target.closest(".nav-item");
-        if (navItem) {
-          const hash = navItem.getAttribute("data-hash");
-          window.location.hash = hash;
-        }
-      });
-
-      window.addEventListener("hashchange", handleRoute);
-
-      window.addEventListener("load", () => {
-        handleRoute();
-        // 删除重复的全局图片预加载，改为按需预加载
-      });
-
-      // ====================== 全局定时器 ======================
-      setInterval(() => {
-        const now = new Date();
-        const currentDateStr = now.toDateString();
-        const formattedTime = formatTime(now);
-
-        const activePanel = document.querySelector(".page-panel.active");
-        if (activePanel) {
-          const timeEl = document.getElementById(
-            `${activePanel.id.replace("-panel", "")}-realTime`,
-          );
-          if (timeEl) timeEl.textContent = formattedTime;
-
-          if (activePanel.id !== "home-panel") {
-            const nationKey = activePanel.id.replace("-panel", "");
-            if (allModules[nationKey]) {
-              allModules[nationKey].updateCountdowns();
-            }
-          } else {
-            const countdownElements = document.querySelectorAll(
-              "#home-panel .countdown-time[data-birthday]",
-            );
-            countdownElements.forEach((el) => {
-              const birthday = el.getAttribute("data-birthday");
-              const detail = getCountdownDetail(birthday);
-              el.textContent = detail.countdownText;
-              const card = el.closest(".original-card");
-              if (detail.isToday) {
-                card.classList.add("today-card");
-              } else {
-                card.classList.remove("today-card");
-              }
-            });
-
-            // 跨天自动刷新
-            if (currentDateStr !== lastHomeRenderDate) {
-              renderTodayBirthday();
-              renderUpcomingBirthday();
-              lastHomeRenderDate = currentDateStr;
-            }
-          }
-        }
-      }, 1000);
-    </script>
-  </body>
+/* ====================== 启动 ====================== */
+allRoleList.forEach((r,i)=>ROLE_NO.set(r,i+1));
+const footEl=document.getElementById("footCount");
+if(footEl)footEl.innerHTML=allRoleList.length+' 位旅伴 · 皆有名讳与日期<br>Ayash1mo';
+pickHero();renderToday();renderAlmanac();renderFilters();
+initCardFX();initReveal();initTheme();
+document.querySelectorAll("img").forEach(markLoaded);
+markLoaded(document.getElementById("heroImg"));
+tick();setInterval(tick,1000);
+window.addEventListener("load",()=>setTimeout(()=>{
+  document.querySelectorAll(".rise:not(.in)").forEach(el=>el.classList.add("in"));
+},1600));
+</script>
+</body>
 </html>
