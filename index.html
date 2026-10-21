@@ -30,10 +30,10 @@
   --brand:#6d4dff; --brand-rgb:109,77,255; --brand-soft:rgba(109,77,255,.09);
 }
 *{margin:0;padding:0;box-sizing:border-box}
-html{scroll-behavior:smooth}
+html{scroll-behavior:smooth;overflow-x:hidden;overflow-x:clip}
 body{
   background:var(--bg);color:var(--ink);font-family:var(--sans);
-  -webkit-font-smoothing:antialiased;overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;overflow-x:hidden;overflow-x:clip;
   transition:background .5s var(--ease),color .5s var(--ease);
 }
 ::selection{background:rgba(var(--brand-rgb),.4)}
@@ -94,7 +94,7 @@ button{font-family:inherit;border:none;background:none;color:inherit;cursor:poin
 [data-theme="light"] #iconSun{opacity:1;pointer-events:auto}
 
 /* ---------- Hero ---------- */
-.hero{max-width:1200px;margin:0 auto;padding:5rem 1.5rem 3.5rem;position:relative}
+.hero{max-width:1200px;margin:0 auto;padding:5rem 1.5rem 3.5rem;position:relative;overflow-x:clip}
 .hero-bg{
   position:absolute;inset:-40% -20%;z-index:-1;pointer-events:none;
   background:
@@ -140,6 +140,14 @@ button{font-family:inherit;border:none;background:none;color:inherit;cursor:poin
 
 /* 主角图 */
 .hero-fig{position:relative;max-width:420px;justify-self:center}
+/* ---------- 生日庆祝 emoji 层：位于大卡片后方喷发 ---------- */
+.hero-fig .frame{position:relative;z-index:1}   /* 卡片抬到 emoji 层之上 */
+.emoji-layer{
+  position:absolute;left:50%;top:50%;width:220%;height:280%;
+  transform:translate(-50%,-50%);z-index:0;
+  pointer-events:none;overflow:hidden;          /* 层内裁剪，绝不撑破页面 */
+}
+.emoji-pop{position:absolute;line-height:1;user-select:none;-webkit-user-select:none;will-change:transform,opacity}
 .hero-fig .frame{
   border-radius:var(--r-xl);overflow:hidden;border:1px solid var(--line2);
   background:var(--surface);box-shadow:0 30px 80px -20px rgba(0,0,0,.55);
@@ -1206,6 +1214,8 @@ function renderAlmanac(){
   for(let m=1;m<=12;m++){
     const list=allRoleList.filter(r=>r.birthday!=="???"&&+r.birthday.split("-")[0]===m);
     if(!list.length)continue;
+    /* 月内小卡片按生日日号升序排列（filter 产生的是新数组，不影响 allRoleList 原始顺序/编号） */
+    list.sort((a,b)=>+a.birthday.split("-")[1]-+b.birthday.split("-")[1]);
     const sec=document.createElement("section");
     sec.className="month";sec.id="m"+m;
     const soon=list.map(r=>({r,d:getDetail(r.birthday)})).filter(x=>x.d.isSoon||x.d.isToday).length;
@@ -1324,6 +1334,50 @@ function initReveal(){
   els.forEach(el=>io.observe(el));
 }
 
+/* ====================== 生日庆祝 emoji 喷发（每个时机仅一次） ====================== */
+let enterFired=false, crossDayFired=false;   /* 两个布尔标记：进入页面一次、跨午夜一次 */
+const EMOJI_POOL=["🎉","🎂","😘","🥳","✨","🎁","🍰"];
+function hasBirthdayToday(){
+  return allRoleList.some(r=>r.birthday!=="???"&&getDetail(r.birthday).isToday);
+}
+function celebrate(){
+  /* 无障碍：用户偏好减少动效时整个效果禁用 */
+  if(matchMedia("(prefers-reduced-motion:reduce)").matches)return;
+  const fig=document.getElementById("heroFig");if(!fig)return;
+  const layer=document.createElement("div");
+  layer.className="emoji-layer";              /* 挂在 hero-fig 上，z-index 低于 .frame → 从卡片后方炸出 */
+  fig.appendChild(layer);
+  const isMobile=matchMedia("(max-width:520px)").matches;
+  /* 喷发层以卡片为中心放大约 2.2 倍，emoji 全程只在层内活动（层自身 overflow:hidden） */
+  const W=fig.clientWidth*2.2, H=fig.clientHeight*2.2;
+  const cx=W/2, cy=H*.52;                     /* 出生点：卡片中心偏下 */
+  const count=isMobile?12+Math.floor(Math.random()*7):18+Math.floor(Math.random()*11);
+  for(let i=0;i<count;i++){
+    const s=document.createElement("span");
+    s.className="emoji-pop";
+    s.textContent=EMOJI_POOL[Math.floor(Math.random()*EMOJI_POOL.length)];
+    s.style.fontSize=(isMobile?(.85+Math.random()*.8):(1.2+Math.random()*1.2))+"rem";
+    s.style.left=cx+"px";s.style.top=cy+"px";
+    layer.appendChild(s);
+    /* 喷泉式轨迹：从卡片后方炸出 → 沿上半球随机角度飞散（越过卡片顶进入上方空白区）→ 受重力下落 */
+    const ang=(-20-Math.random()*140)*Math.PI/180;          /* -20°～-160°，向上半球 */
+    const dist=H*(.28+Math.random()*.30);
+    const tx=Math.max(-W*.46,Math.min(W*.46,Math.cos(ang)*dist)); /* 横向落点（限制在层内） */
+    const ty=Math.sin(ang)*dist;                            /* 纵向落点（负值=向上） */
+    const down=H*(.28+Math.random()*.35);                   /* 重力下落距离 */
+    const rot=(Math.random()-.5)*540;
+    const dur=1600+Math.random()*1000, delay=Math.random()*350;
+    s.animate([
+      {transform:"translate(-50%,-50%) scale(0) rotate(0deg)",opacity:0},
+      {transform:"translate(calc(-50% + "+tx*.7+"px),calc(-50% + "+ty*.7+"px)) scale(1.12) rotate("+(rot*.35)+"deg)",opacity:1,offset:.38},
+      {transform:"translate(calc(-50% + "+tx+"px),calc(-50% + "+ty+"px)) scale(1) rotate("+(rot*.7)+"deg)",opacity:1,offset:.62},
+      {transform:"translate(calc(-50% + "+tx*1.05+"px),calc(-50% + "+(ty+down)+"px)) scale(.8) rotate("+rot+"deg)",opacity:0}
+    ],{duration:dur,delay:delay,easing:"cubic-bezier(.22,.8,.35,1)",fill:"both"});
+    setTimeout(()=>s.remove(),dur+delay+200);  /* 动画结束移除节点，不留垃圾 DOM */
+  }
+  setTimeout(()=>layer.remove(),4000);
+}
+
 /* ====================== 时钟 / 每秒 / 跨天 ====================== */
 let dayStamp=new Date().toDateString();
 let tickN=0;
@@ -1334,19 +1388,19 @@ function tick(){
     n.getFullYear()+"/"+String(n.getMonth()+1).padStart(2,"0")+"/"+String(n.getDate()).padStart(2,"0")
     +" 周"+wd+" "+String(n.getHours()).padStart(2,"0")+":"+String(n.getMinutes()).padStart(2,"0")+":"+String(n.getSeconds()).padStart(2,"0");
   tickN++;
-  /* 时钟每秒走，倒计时数值每 2 秒刷新一次（肉眼几乎看不出差异，计算量减半） */
-  if(tickN%2===0){
-    document.querySelectorAll(".card-cd[data-b]").forEach(el=>{
-      el.textContent=getDetail(el.dataset.b, n).text;
-    });
-    tickCount();
-    /* 同一天多角色过生日时，Hero 每 4 秒轮换一位 */
-    if(heroPool&&heroPool.length>1&&heroPool[0].d.isToday&&tickN%4===0){
-      heroIdx=(heroIdx+1)%heroPool.length;
-      renderHero();
-    }
+  /* 倒计时与顶部时钟同频：每秒都刷新，保证秒位实时 */
+  document.querySelectorAll(".card-cd[data-b]").forEach(el=>{
+    el.textContent=getDetail(el.dataset.b, n).text;
+  });
+  tickCount();
+  /* 同一天多角色过生日时，Hero 每 4 秒轮换一位 */
+  if(heroPool&&heroPool.length>1&&heroPool[0].d.isToday&&tickN%4===0){
+    heroIdx=(heroIdx+1)%heroPool.length;
+    renderHero();
   }
   if(n.toDateString()!==dayStamp){dayStamp=n.toDateString();pickHero();renderToday();
+    /* 跨午夜进入生日当天 → 补发一次庆祝（页面常开期间仅此一次） */
+    if(!crossDayFired&&hasBirthdayToday()){crossDayFired=true;setTimeout(celebrate,600);}
     document.querySelectorAll(".card").forEach(el=>{
       const d=getDetail(el.querySelector(".card-cd").dataset.b, n);
       el.classList.toggle("today",d.isToday);el.classList.toggle("soon",d.isSoon);
@@ -1382,6 +1436,8 @@ initCardFX();initReveal();initTheme();
 document.querySelectorAll("img").forEach(markLoaded);
 markLoaded(document.getElementById("heroImg"));
 tick();setInterval(tick,1000);
+/* 打开页面时恰逢生日当天 → 欢迎喷发一次（仅此一次，轮播/交互均不再触发） */
+if(hasBirthdayToday()){enterFired=true;setTimeout(celebrate,900);}
 window.addEventListener("load",()=>setTimeout(()=>{
   document.querySelectorAll(".rise:not(.in)").forEach(el=>el.classList.add("in"));
 },1600));
