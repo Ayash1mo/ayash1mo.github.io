@@ -1,12 +1,13 @@
-<!doctype html>
-<html lang="zh-CN">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>提瓦特生日 · Teyvat Birthdays</title>
-<meta name="description" content="原神全角色生日倒计时 · 现代简约版" />
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎂</text></svg>">
-<style>
+<!DOCTYPE html>
+<html data-page-node-id="pAc6hk7C1RDL60r0pGP7w6" lang="zh-CN">
+<head data-page-node-id="1eeoMCnu0NBseGktkBw5qO">
+<script data-page-node-id="GQhSeNB3OyWWvul9SmhqV3" src="/page/page_comm/inject.js"></script>
+<meta data-page-node-id="fuB54vV6TmaUBOf0ztw4IS" charset="UTF-8">
+<meta data-page-node-id="jkqgvfqsehnEigdGSzcF0b" content="width=device-width, initial-scale=1.0" name="viewport">
+<title data-page-node-id="gIDDCkYGZRLQK9thUp9S6n" data-pnid-children="boRY9gAfGkrLdfKjfRZD6m">提瓦特生日 · Teyvat Birthdays</title>
+<meta data-page-node-id="0E8YWtFP7bUFVhefdUII8I" content="原神全角色生日倒计时 · 现代简约版" name="description">
+<link data-page-node-id="4rrWi22NijAp1ioRzZzkYq" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎂</text></svg>" rel="icon">
+<style data-page-node-id="618QdO5LhfBMbvcoai5mDN" data-pnid-children="5jNYzbqK9OUk42oGOXNDvq">
 /* ============================================================
    提瓦特生日 · Modern Minimal（暗色现代 + 高级动效）
    ============================================================ */
@@ -263,6 +264,19 @@ button{font-family:inherit;border:none;background:none;color:inherit;cursor:poin
 .foot{border-top:1px solid var(--line);padding:3rem 1.5rem 4rem;text-align:center}
 .foot .f-logo{font-weight:800;letter-spacing:-.02em;margin-bottom:.6rem}
 .foot p{font-size:.72rem;color:var(--ink3);letter-spacing:.18em;line-height:2}
+.foot .f-links{margin-top:.85rem;display:flex;justify-content:center;gap:.85rem}
+.foot .f-links a{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:28px;height:28px;border-radius:50%;
+  background:var(--surface2);border:1px solid var(--line2);
+  color:var(--ink2);transition:all var(--dur) var(--ease);
+}
+.foot .f-links a:hover{
+  transform:translateY(-3px);
+  background:var(--brand-soft);border-color:var(--brand);
+  color:var(--brand);box-shadow:0 6px 18px rgba(var(--brand-rgb),.25);
+}
+.foot .f-links a svg{width:15px;height:15px}
 
 /* ---------- 动效 ---------- */
 @keyframes dotPulse{0%,100%{opacity:1}50%{opacity:.45}}
@@ -296,778 +310,1573 @@ button{font-family:inherit;border:none;background:none;color:inherit;cursor:poin
   /* 移动端卡片：图片区改 1/1，配合上面的列宽锁定，整卡接近正方形 */
   .card-img{aspect-ratio:1/1}
 }
+
+/* ---------- 角色生日贺图弹窗 ---------- */
+.card{cursor:pointer}
+.bd-modal{
+  position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;padding:1.5rem;
+  visibility:hidden;opacity:0;pointer-events:none;
+  transition:opacity var(--dur) var(--ease),visibility 0s linear var(--dur);
+}
+.bd-modal.open{visibility:visible;opacity:1;pointer-events:auto;transition:opacity var(--dur) var(--ease)}
+.bd-mask{position:absolute;inset:0;background:rgba(6,6,10,.68);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.bd-dialog{
+  position:relative;width:min(560px,100%);max-height:min(88vh,860px);
+  display:flex;flex-direction:column;overflow:hidden;
+  background:var(--surface);border:1px solid var(--line2);border-radius:var(--r-xl);
+  box-shadow:0 40px 100px -20px rgba(0,0,0,.7);
+  opacity:0;transform:translateY(18px) scale(.96);
+  transition:opacity var(--dur) var(--ease),transform var(--dur) var(--ease);
+}
+.bd-modal.open .bd-dialog{opacity:1;transform:none}
+.bd-close{
+  position:absolute;top:.8rem;right:.8rem;z-index:5;
+  width:34px;height:34px;border-radius:50%;display:grid;place-items:center;
+  background:rgba(10,10,14,.55);border:1px solid rgba(255,255,255,.18);color:#fff;
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:all var(--dur) var(--ease);
+}
+.bd-close:hover{transform:rotate(90deg);border-color:var(--brand)}
+.bd-close svg{width:15px;height:15px}
+.bd-stage{position:relative;flex-shrink:0;background:var(--surface2);aspect-ratio:16/10;overflow:hidden}
+.bd-stage img{
+  position:absolute;inset:0;width:100%;height:100%;object-fit:contain;padding:.6rem;
+  opacity:0;transform:scale(1.04);filter:blur(10px);
+  transition:opacity .5s var(--ease),transform .5s var(--ease),filter .5s var(--ease);
+}
+.bd-stage img.ld{opacity:1;transform:scale(1);filter:none}
+.bd-counter{
+  position:absolute;top:.85rem;left:.85rem;z-index:4;
+  font-family:var(--mono);font-size:.62rem;font-weight:700;letter-spacing:.18em;color:#fff;
+  background:rgba(10,10,14,.55);border:1px solid rgba(255,255,255,.18);
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  padding:.32em .8em;border-radius:999px;pointer-events:none;
+}
+.bd-nav{
+  position:absolute;top:50%;transform:translateY(-50%);z-index:4;
+  width:38px;height:38px;border-radius:50%;display:none;place-items:center;
+  background:rgba(10,10,14,.5);border:1px solid rgba(255,255,255,.18);color:#fff;
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);transition:all var(--dur) var(--ease);
+}
+.bd-nav:hover{background:var(--brand);border-color:var(--brand)}
+.bd-nav svg{width:16px;height:16px}
+.bd-nav.prev{left:.7rem}
+.bd-nav.next{right:.7rem}
+.bd-stage.multi .bd-nav{display:grid}
+.bd-dots{position:absolute;left:0;right:0;bottom:.7rem;z-index:4;display:none;justify-content:center;gap:.45rem;padding:0 3.4rem;flex-wrap:wrap}
+.bd-stage.multi .bd-dots{display:flex}
+.bd-dot{width:7px;height:7px;border-radius:999px;background:rgba(255,255,255,.28);cursor:pointer;transition:all var(--dur) var(--ease)}
+.bd-dot:hover{background:rgba(255,255,255,.55)}
+.bd-dot.on{width:1.3rem;background:var(--brand)}
+.bd-body{padding:1.15rem 1.3rem 1.3rem;overflow-y:auto;min-height:0}
+.bd-title-row{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin-bottom:.2rem}
+.bd-title-row h3{font-size:1.25rem;font-weight:800;letter-spacing:-.01em}
+.bd-tag{font-size:.65rem;font-weight:700;letter-spacing:.14em;padding:.3em .8em;border-radius:999px;border:1px solid rgba(var(--brand-rgb),.4);color:var(--brand);background:var(--brand-soft)}
+.bd-tag.mono{font-family:var(--mono)}
+.bd-tip{margin-top:.8rem;padding-top:.7rem;border-top:1px solid var(--line);font-size:.66rem;color:var(--ink3);letter-spacing:.05em;display:flex;align-items:center;gap:.4rem}
+@media (max-width:520px){
+  .bd-modal{padding:.9rem}
+  .bd-stage{aspect-ratio:1/1}
+  .bd-body{padding:.95rem 1rem 1.05rem}
+}
 </style>
 </head>
-<body>
-<a class="skip" href="#main">跳转到主内容</a>
+<body data-page-node-id="GZCljnFbJ9qjDCErMhYbxI">
+<a data-page-node-id="ooFOMaU8mWhTTvQNYYZ7MG" class="skip" href="#main"><!--pnid:HNxbVy1iDLmX8lGpRELo9x-->跳转到主内容</a>
 
-<header class="nav">
-  <div class="nav-in">
-    <div class="logo"><span class="dot"></span>提瓦特生日<em>· TEYVAT</em></div>
-    <div class="nav-right">
-      <span class="clock" id="clock" aria-live="polite">—</span>
-      <button class="theme-btn" id="themeBtn" aria-label="切换明暗主题">
-        <svg id="iconMoon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg>
-        <svg id="iconSun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+<header data-page-node-id="aIehLrBX3BV9uwoITJPTqT" class="nav">
+  <div data-page-node-id="6EqTDkrOewGeMiCycQdd0l" class="nav-in">
+    <div data-page-node-id="YpHJRNWovEIvSOKxMBU62n" class="logo"><span data-page-node-id="BJ0RzU547EGliYiEIJK0TM" class="dot"></span><!--pnid:zlDnXBMqoIToU7qrEWKGHn-->提瓦特生日<em data-page-node-id="cD2buB2df3JJdNV5BmmzHt"><!--pnid:9oddO39xeXhJHHlYXTPseH-->· TEYVAT</em></div>
+    <div data-page-node-id="KrAlTxnb4bXTXURkToGztz" class="nav-right">
+      <span data-page-node-id="ehLpq2BeV028XsAVmYatxN" aria-live="polite" class="clock" id="clock"><!--pnid:UxqKgzXdFWSnSQGr0OKi9A-->—</span>
+      <button data-page-node-id="OtU0VK1ywthXJmJqPBWYw2" aria-label="切换明暗主题" class="theme-btn" id="themeBtn">
+        <svg data-page-node-id="EDI1XCPsqxLzVW3XNgBEgm" fill="none" id="iconMoon" stroke="currentColor" stroke-linecap="round" stroke-width="2" viewBox="0 0 24 24"><path data-page-node-id="1OMio6hhtyukds2AHgn9gD" d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg>
+        <svg data-page-node-id="VzFoKxpk2hqbE31XQQerXH" fill="none" id="iconSun" stroke="currentColor" stroke-linecap="round" stroke-width="2" viewBox="0 0 24 24"><circle data-page-node-id="eu3IzPQvgEu3YhKNJ18wHj" cx="12" cy="12" r="4"/><path data-page-node-id="n1bJVZrA0oqjhI4lKHKHv9" d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
       </button>
     </div>
   </div>
 </header>
 
-<main id="main">
-  <section class="hero">
-    <div class="hero-bg" aria-hidden="true"></div>
-    <p class="kicker">Next Birthday · 下一位庆生</p>
-    <div class="hero-grid">
-      <div>
-        <h1 class="hero-name" id="heroName">—</h1>
-        <div class="hero-meta" id="heroMeta"></div>
-        <div class="count" id="heroCount" aria-label="倒计时"></div>
-        <p class="hero-note" id="heroNote">全站倒计时每秒自动刷新 · 跨午夜自动更新</p>
+<main data-page-node-id="oJdUOK8YjA6QGFisZSGQyn" id="main">
+  <section data-page-node-id="lW1IAVxKhFwzShiaE8x5EY" class="hero">
+    <div data-page-node-id="Rzock8iJfVVUfQDgEn1ILj" aria-hidden="true" class="hero-bg"></div>
+    <p data-page-node-id="ZUMw7VTemH15cR2z81MjnN" class="kicker"><!--pnid:p0M1IOB6HlPSlbA7Z1kNJI-->Next Birthday · 下一位庆生</p>
+    <div data-page-node-id="HPeAgzbyp7LSDZjd2IjCii" class="hero-grid">
+      <div data-page-node-id="UomUl7ynPF8XheabxfeFKd">
+        <h1 data-page-node-id="gt4U5URYKKrQqjk6yxEfkW" class="hero-name" id="heroName"><!--pnid:hoI2NoSUFvv7FdWBWVjVZj-->—</h1>
+        <div data-page-node-id="34nghuoIqL1xRytEzEEZKt" class="hero-meta" id="heroMeta"></div>
+        <div data-page-node-id="hqVb8nOmo3MH4rjGKY62ri" aria-label="倒计时" class="count" id="heroCount"></div>
+        <p data-page-node-id="lTq8CvKh0o1g8H2o3fCeUB" class="hero-note" id="heroNote"><!--pnid:L0SKRbzyuFwyPJSHXnbIk9-->全站倒计时每秒自动刷新 · 跨午夜自动更新</p>
       </div>
-      <figure class="hero-fig" id="heroFig" style="visibility:hidden">
-        <div class="frame">
-          <img id="heroImg" alt="" loading="eager" fetchpriority="high" decoding="async">
-          <span class="badge" id="heroBadge">NEXT</span>
+      <figure data-page-node-id="jjHU9k1M2xVB29FFCyk4nf" class="hero-fig" id="heroFig" style="visibility:hidden">
+        <div data-page-node-id="MQ455NjfdPfqzuVGceoSEr" class="frame">
+          <img data-page-node-id="yiIIQkxoSIhk2GInuMURdf" alt decoding="async" fetchpriority="high" id="heroImg" loading="eager">
+          <span data-page-node-id="9ury4kUD7MSHeTXhgHZAGA" class="badge" id="heroBadge"><!--pnid:ZhvOEKrmbGHr9lNpMw8Hye-->NEXT</span>
         </div>
       </figure>
     </div>
   </section>
 
-  <div class="today-bar"><div class="today-inner" id="todayBox"></div></div>
+  <div data-page-node-id="goDLnoJWCrxQ4nAKRlzmOF" class="today-bar"><div data-page-node-id="BoIRBVgDcGAAQtpdDvWOCK" class="today-inner" id="todayBox"></div></div>
 
-  <div class="filter-wrap"><nav class="filters" id="filters" aria-label="地区过滤"></nav></div>
+  <div data-page-node-id="6eZFVMe5241IdYBsj4T40o" class="filter-wrap"><nav data-page-node-id="fzwmi086J8MOKg0jAzn0CL" aria-label="地区过滤" class="filters" id="filters"></nav></div>
 
-  <div class="almanac" id="almanac"></div>
+  <div data-page-node-id="7lBSzCzwDlFqXQPa5nqf1w" class="almanac" id="almanac"></div>
 </main>
 
-<footer class="foot">
-  <div class="f-logo">Teyvat Birthdays</div>
-  <p id="footCount">— 位旅伴 · 皆有名讳与日期<br>Ayash1mo</p>
+<footer data-page-node-id="6ac3OQXWhZpYAEnI8ygejL" class="foot">
+  <div data-page-node-id="wl7BJIr41hmWpwI2Ndwy0U" class="f-logo"><!--pnid:hXJin6ri7VmXz3ihYNHJgQ-->Teyvat Birthdays</div>
+  <p data-page-node-id="sH2Aim80mXggdDCidM2KSb" id="footCount"><!--pnid:zRyrjXjf2b117flIEKjC2e-->— 位旅伴 · 皆有名讳与日期<br data-page-node-id="INaXlmrmXgNOxdHgHyWqpn"><!--pnid:PvPwQOPJhVqaKr0rWBFytP-->Ayash1mo</p>
+  <div data-page-node-id="6q2qZCkis50XoKOcwHkp6r" class="f-links" id="footLinks">
+    <a data-page-node-id="uuRW8VmzQjBGlKSS1d7lQa" aria-label="GitHub 主页" href="https://github.com/Ayash1mo/ayash1mo.github.io" rel="noopener noreferrer" target="_blank" title="GitHub">
+      <svg data-page-node-id="QMQhA6UvzdtfE3asDDiAGD" fill="currentColor" viewBox="0 0 24 24"><path data-page-node-id="XujNGzZM2GzaXPTvBmWo6n" d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+    </a>
+    <a data-page-node-id="pVNKI6BD1zSQbqkUpDeAwY" aria-label="发送邮件" href="mailto:3401795043@qq.com" title="邮箱">
+      <svg data-page-node-id="FprUY6o4PYyVOJvBmI3dn0" fill="currentColor" viewBox="0 0 24 24"><path data-page-node-id="kBX3NkVdYdFLXQzfEKzfMi" d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+    </a>
+  </div>
 </footer>
 
-<script>
-/* ====================== 角色数据（原样保留 120 条） ====================== */
+<!--pnid:u3yRAJFDlPtBR1v1Vcsb1n--><!-- 角色生日贺图弹窗：结构仅此一份，内容由 JS 按所点卡片动态注入 -->
+<div data-page-node-id="GjD3rglwmhbueooPsnUsbZ" aria-hidden="true" aria-labelledby="bdTitle" aria-modal="true" class="bd-modal" id="bdModal" role="dialog">
+  <div data-page-node-id="2vdxnsme53ewWzzqTgcPmh" class="bd-mask" id="bdMask"></div>
+  <div data-page-node-id="8DWE0FNIbooVFqJOebJ90v" class="bd-dialog" role="document">
+    <button data-page-node-id="6HS5iaWMvEmhLIDG6FefmP" aria-label="关闭弹窗" class="bd-close" id="bdClose">
+      <svg data-page-node-id="pXdn4VFgizQHYhFVMSzxbP" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2.4" viewBox="0 0 24 24"><path data-page-node-id="wVqmVNYrvjFhrsRodfv632" d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+    <div data-page-node-id="AJp2ifs5YU7D8bqead7qKQ" class="bd-stage" id="bdStage">
+      <span data-page-node-id="TV4ikrpGPrSzU74k9GExhF" class="bd-counter" id="bdCounter"><!--pnid:mjijqNKhFlIC5B5Z59aw0C-->1 / 1</span>
+      <button data-page-node-id="UtzEaPXDhUMDByfydgaQsf" aria-label="上一张" class="bd-nav prev" id="bdPrev">
+        <svg data-page-node-id="WUiwZgEef8J9y0cTyxvyoQ" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4" viewBox="0 0 24 24"><path data-page-node-id="se69YXCT0aLP3OlUEcduh3" d="M15 5l-7 7 7 7"/></svg>
+      </button>
+      <button data-page-node-id="ObTWOC5KixSVzYkClJ7c0v" aria-label="下一张" class="bd-nav next" id="bdNext">
+        <svg data-page-node-id="aNnRiIkBHA5IO5m6RhqhGL" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4" viewBox="0 0 24 24"><path data-page-node-id="srDRYqkCuAWxcpqDvSgTtW" d="M9 5l7 7-7 7"/></svg>
+      </button>
+      <div data-page-node-id="xsc7SdWEnyi5ZXapTxJLNt" class="bd-dots" id="bdDots"></div>
+    </div>
+    <div data-page-node-id="GBrLvKRk94C0549jztM2sH" class="bd-body">
+      <div data-page-node-id="fuf8WkkNRRXtpN15pK6kkU" class="bd-title-row"><h3 data-page-node-id="TjdBlbMhjMuNJu08EyOa8k" id="bdTitle"></h3><span data-page-node-id="ZMbiZOc7ePPguCsQttC1Va" class="bd-tag" id="bdNat"></span><span data-page-node-id="Sj31TcEb9EInezgMN9z5At" class="bd-tag mono" id="bdDate"></span></div>
+      <div data-page-node-id="jhd8WAlkpo11Fa6kJIlnYN" class="bd-tip"><span data-page-node-id="9iEU4LXonTBbc7DtfAQ8ws"><!--pnid:JulEzaLCLjaYJoUmt8LmVe-->🎂</span><span data-page-node-id="QcR8A7VmZByKvLoWWPCs2C" id="bdTipText"><!--pnid:txHvFptq98BYOLAKnKmxGU-->首张为抽卡立绘，其余为生日贺图</span></div>
+    </div>
+  </div>
+</div>
+
+<script data-page-node-id="4gkIROqjgACWWJ7IQ1AOzZ" data-pnid-children="Mq77P20WASarNRZZrFdKKY">
+/* ====================== 角色数据（120 条 · 角色 + 图片合而为一） ======================
+   一个角色 = 一条记录：name（姓名）/ nation（所属）/ birthday（生日 MM-DD）/ images（图片列表）。
+   images 的排列约定（顺序＝弹窗内轮播顺序）：
+     · 第 1 行 images[0]  → 抽卡立绘，作为卡片缩略图与 Hero 主视觉的默认图；
+     · 第 2 行起 images[1]、images[2]…… → 该角色的生日贺图，可放任意多张。
+   未填生日贺图的角色：弹窗只展示这张抽卡立绘。
+   补图示例（把地址换成真实直链即可，注意逗号）：
+     {
+       "name": "温迪",
+       "nation": "蒙德",
+       "birthday": "06-16",
+       "images": [
+         "https://……温迪-抽卡立绘.png",
+         "https://……温迪-生日贺图-1.jpg",
+         "https://……温迪-生日贺图-2.jpg"
+       ]
+     }
+   ================================================================================ */
 const allRoleList = [
   {
     "name": "温迪",
     "nation": "蒙德",
     "birthday": "06-16",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/2/20/n7fr5xrf4d3gcivxktprxmp1ze5171k.png/1200px-%E6%B8%A9%E8%BF%AA%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/2/20/n7fr5xrf4d3gcivxktprxmp1ze5171k.png/1200px-%E6%B8%A9%E8%BF%AA%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
+      "https://patchwiki.biligame.com/images/ys/8/83/ktdfazxanw0k1409m8y7upnqgu7afya.png",
+      "https://patchwiki.biligame.com/images/ys/f/f8/djfrmnlphxe9hp45yollnmgo7db16yy.png",
+      "https://patchwiki.biligame.com/images/ys/1/1b/lctdfhxoau3w37vnx875adn5kkb503f.png",
+      "https://patchwiki.biligame.com/images/ys/6/6e/7dn7wk1flnporxtina6t0ys3qvm8g45.png",
+      "https://patchwiki.biligame.com/images/ys/1/1d/6mjn1gb0609lpk91tngv181ichf75h9.png",
+      "https://patchwiki.biligame.com/images/ys/7/7b/0n2nklyxlf92dp4yvzce7yk52mcy2zz.png",
+      "https://patchwiki.biligame.com/images/ys/6/6e/k7uxdtfwl6agyj9oqdt0zbxqma9c1em.png"
+    ]
   },
   {
     "name": "琴",
     "nation": "蒙德",
     "birthday": "03-14",
-    "image": "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/dea5ece7ee126ebd2246d7cd963752a5_1417052722963956277.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp"
+    "images": [
+      "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/dea5ece7ee126ebd2246d7cd963752a5_1417052722963956277.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp",
+      "https://patchwiki.biligame.com/images/ys/6/6d/kxrml55n450ka7cpul8kg1f1vvpnj8w.png",
+      "https://patchwiki.biligame.com/images/ys/2/24/gylsb9ye6z8zqre45oj4t0n614zlysz.png",
+      "https://patchwiki.biligame.com/images/ys/3/34/8nhz1vxgfdwj2etqlpq79imu5thuohe.png",
+      "https://patchwiki.biligame.com/images/ys/d/d4/g7b7tic42elnzuh84cepnn7xvtb8i8w.jpg",
+      "https://patchwiki.biligame.com/images/ys/8/87/t4t1jwnze7zewe7zu7l3g3fg3y38cbn.jpg",
+      "https://patchwiki.biligame.com/images/ys/f/f4/exm89rkfkme2u0axpi518fr1e9ot3sn.jpg"
+    ]
   },
   {
     "name": "法尔伽",
     "nation": "蒙德",
     "birthday": "02-17",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/a/a3/482kibaof2mc0hfi50uvu9kvbg5xv55.png/1200px-%E6%B3%95%E5%B0%94%E4%BC%BD%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/a/a3/482kibaof2mc0hfi50uvu9kvbg5xv55.png/1200px-%E6%B3%95%E5%B0%94%E4%BC%BD%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    ]
   },
   {
     "name": "杜林",
     "nation": "蒙德",
     "birthday": "03-14",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/7/73/q1hetz3svx98winupq5qbai45ww2t1o.png/1200px-%E6%9D%9C%E6%9E%97%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/7/73/q1hetz3svx98winupq5qbai45ww2t1o.png/1200px-%E6%9D%9C%E6%9E%97%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
+      "https://patchwiki.biligame.com/images/ys/7/7a/6oxypjvp7ppq3lr50wyszz2cfe2gv3x.jpg"
+    ]
   },
   {
     "name": "洛恩",
     "nation": "蒙德",
     "birthday": "04-03",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/1/1a/nvu8pg4vkvicbbva53xg75hvpa3yvbk.png/1920px-%E6%B4%9B%E6%81%A9%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/1/1a/nvu8pg4vkvicbbva53xg75hvpa3yvbk.png/1920px-%E6%B4%9B%E6%81%A9%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    ]
   },
   {
     "name": "布伦妮",
     "nation": "蒙德",
     "birthday": "11-20",
-    "image": "https://patchwiki.biligame.com/images/ys/0/08/dbdwv9if3ywf71mqex3ajiwkqjtapr1.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/0/08/dbdwv9if3ywf71mqex3ajiwkqjtapr1.png"
+    ]
   },
   {
     "name": "安柏",
     "nation": "蒙德",
     "birthday": "08-10",
-    "image": "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/7bbdf4885bbe0c9d91bb0b202482dfd3_7501173286059949014.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp"
+    "images": [
+      "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/7bbdf4885bbe0c9d91bb0b202482dfd3_7501173286059949014.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp",
+      "https://patchwiki.biligame.com/images/ys/8/86/8w54wqsx9muxucbxy3gbi91r5qklc5h.png",
+      "https://patchwiki.biligame.com/images/ys/4/44/dp8tenxq18zlanfcbzooxj8k5izqgq5.png",
+      "https://patchwiki.biligame.com/images/ys/e/e4/7qjggbds6ges021tmrm9z16io2q63nc.png",
+      "https://patchwiki.biligame.com/images/ys/3/36/jn52o5v3q3mn3yga7f0v99vyxhiaul7.png",
+      "https://patchwiki.biligame.com/images/ys/e/e7/i41os58j2g5ls1zvqnifuszi9hzkb4r.png",
+      "https://patchwiki.biligame.com/images/ys/5/56/ov2st02fbsyam4revad1gm2sxi31zhc.png",
+      "https://patchwiki.biligame.com/images/ys/f/f9/33rt6pouitr8dm5a0dx005riwc0nmex.png"
+    ]
   },
   {
     "name": "丽莎",
     "nation": "蒙德",
     "birthday": "06-09",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/7/70/q3oapvjdcr344dr90kvvulvp24e98o6.png/1920px-%E4%B8%BD%E8%8E%8E%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/7/70/q3oapvjdcr344dr90kvvulvp24e98o6.png/1920px-%E4%B8%BD%E8%8E%8E%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
+      "https://patchwiki.biligame.com/images/ys/3/3b/kkwt4bj66n95gqxsojbugqp5c8b4u6s.png",
+      "https://patchwiki.biligame.com/images/ys/4/4e/rwdr41j2jv85iz1ikzv7thznq39orqa.png",
+      "https://patchwiki.biligame.com/images/ys/3/34/1jjfbpcmlvbabig0yfpfhu9bujx71j5.png",
+      "https://patchwiki.biligame.com/images/ys/8/86/stevytl69cgedq04o2sduxcfymz5wqh.png",
+      "https://patchwiki.biligame.com/images/ys/3/30/6k6ba97kbriwvd7xwpi7y3mi02lfxna.png",
+      "https://patchwiki.biligame.com/images/ys/3/39/7171ckz38338f2y0bcn41rdwfglcv8u.png",
+      "https://patchwiki.biligame.com/images/ys/c/c0/3vkirw3tppxvap2u1vl6ldzf3a011co.png"
+    ]
   },
   {
     "name": "凯亚",
     "nation": "蒙德",
     "birthday": "11-30",
-    "image": "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/52cdc153be2a74c954fa70e4eb8558dc_5365271345012190127.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp"
+    "images": [
+      "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/52cdc153be2a74c954fa70e4eb8558dc_5365271345012190127.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp",
+      "https://patchwiki.biligame.com/images/ys/b/b2/342q460ciwz2ngi0t525vfdzjcmmij6.png",
+      "https://patchwiki.biligame.com/images/ys/4/42/da5ebgkauou31yqecp3j3vkf5e64g0l.png",
+      "https://patchwiki.biligame.com/images/ys/7/7d/cisnvgtv1juptqw060glkj50z4mywe7.png",
+      "https://patchwiki.biligame.com/images/ys/9/9d/2qqfhhksb6jp0hi910n6opm08nc2lqo.png",
+      "https://patchwiki.biligame.com/images/ys/1/14/6p1yij1n0axlomut68gua32wiozcle4.png",
+      "https://patchwiki.biligame.com/images/ys/a/ac/jlgwp894oerngc54whl7rovboxrm10w.png"
+    ]
   },
   {
     "name": "迪卢克",
     "nation": "蒙德",
     "birthday": "04-30",
-    "image": "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/444d759ee16a78ecb2eee32616ec3c61_8367772886214773599.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp"
+    "images": [
+      "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/444d759ee16a78ecb2eee32616ec3c61_8367772886214773599.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp",
+      "https://patchwiki.biligame.com/images/ys/f/fc/ikx5d7l8htjk9dfr8zhvqt69jxtcoy2.png",
+      "https://patchwiki.biligame.com/images/ys/7/7c/i9d08kw30g8l08nh9tdtik9lz1v4tmf.png",
+      "https://patchwiki.biligame.com/images/ys/2/29/gtdmoviapgmtlmaohgvunead5d0sdqx.png",
+      "https://patchwiki.biligame.com/images/ys/a/a8/il4cb73apkr5ea6969oijxd7uan9kfi.png",
+      "https://patchwiki.biligame.com/images/ys/8/82/iallgesddxfnr3fhhqj01yrfu0kfu2z.png",
+      "https://patchwiki.biligame.com/images/ys/b/ba/ixh81nd4dt0ifak5edvcjk4zx74u06g.png",
+      "https://patchwiki.biligame.com/images/ys/4/4b/4uyhk6ybiegfg9bcrmp0v2uqu2syd74.png"
+    ]
   },
   {
     "name": "芭芭拉",
     "nation": "蒙德",
     "birthday": "07-05",
-    "image": "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/361034bc5f9104c7675612f1e334e141_5681713636829283585.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp"
+    "images": [
+      "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/361034bc5f9104c7675612f1e334e141_5681713636829283585.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp",
+      "https://patchwiki.biligame.com/images/ys/b/b3/f3e195yufy969dbq48gf967vau34do1.png",
+      "https://patchwiki.biligame.com/images/ys/5/57/bkku3albn36jw01k93jktvch40hkm4o.png",
+      "https://patchwiki.biligame.com/images/ys/b/bb/4q5c0xyf3chzma51m1qah4o7p4kihl8.png",
+      "https://patchwiki.biligame.com/images/ys/3/34/7gtlrmo2p0gzdhbnc8nnjcjce6hnlkd.png",
+      "https://patchwiki.biligame.com/images/ys/b/b9/bepmb4ofqvn84e7nozd5nk8ezie3of7.png",
+      "https://patchwiki.biligame.com/images/ys/2/2d/7xjx0cy8iotly17g4dkp7jkhc0b6hyq.png",
+      "https://patchwiki.biligame.com/images/ys/0/03/gp1s57fst4tnfa64cdxar5m1n7iqvha.png"
+    ]
   },
   {
     "name": "雷泽",
     "nation": "蒙德",
     "birthday": "09-09",
-    "image": "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/4f1b144a11410ca576710cb538c926c4_8292535106696181160.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp"
+    "images": [
+      "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/4f1b144a11410ca576710cb538c926c4_8292535106696181160.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp",
+      "https://patchwiki.biligame.com/images/ys/5/5e/efpfnwjmj90g6i7bvs06zl5lgid9p06.png",
+      "https://patchwiki.biligame.com/images/ys/f/fe/pqbkuhb9pqybn77ooodsagzwrsw607w.png",
+      "https://patchwiki.biligame.com/images/ys/b/b4/5055oos55ozhy28wssh6alii47vgrd9.png",
+      "https://patchwiki.biligame.com/images/ys/c/c9/p5wmog9kpld9dqwwb2a2l85tu1lzymw.png",
+      "https://patchwiki.biligame.com/images/ys/9/9e/d83eg7mylzke59ihqbofdqapgylsuib.png",
+      "https://patchwiki.biligame.com/images/ys/3/37/gtirstea57p7n3p8h8c4ll19d7e497m.png",
+      "https://patchwiki.biligame.com/images/ys/8/82/d8lqlqhmiueexxl2y3x7ri7itc8af6r.png"
+    ]
   },
   {
     "name": "可莉",
     "nation": "蒙德",
     "birthday": "07-27",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/6/64/5mcsfdvyw68fhoq36i8u8lz9oghyy3s.png/1200px-%E5%8F%AF%E8%8E%89%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/6/64/5mcsfdvyw68fhoq36i8u8lz9oghyy3s.png/1200px-%E5%8F%AF%E8%8E%89%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
+      "https://patchwiki.biligame.com/images/ys/2/27/k1htluo5z1wemkwsu6hj084y06b1vvv.png",
+      "https://patchwiki.biligame.com/images/ys/f/ff/pmta5vfd7yl4xb191g2lzdqp2j3l47l.png",
+      "https://patchwiki.biligame.com/images/ys/f/fb/11w89thge788hc466uew3edbd68bbs9.png",
+      "https://patchwiki.biligame.com/images/ys/7/71/gfgpc9qg46by8utvkebv0v37hzluxj8.png",
+      "https://patchwiki.biligame.com/images/ys/1/1d/dv0gljdrutj5nidy6zx0sj3qq4ol5nv.png",
+      "https://patchwiki.biligame.com/images/ys/2/21/kk71vhbgwduvkgfyo0fo6352xg4omri.png",
+      "https://patchwiki.biligame.com/images/ys/7/78/rnn1exdwf15t2rjcb3f9mihtro8q03m.png"
+    ]
   },
   {
     "name": "班尼特",
     "nation": "蒙德",
     "birthday": "02-29",
-    "image": "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/29ca301df308db11a0da02e40beb71a6_2738643943661903391.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp"
+    "images": [
+      "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/29ca301df308db11a0da02e40beb71a6_2738643943661903391.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp",
+      "https://patchwiki.biligame.com/images/ys/e/e1/rr3hulm37ym84iz5f2kq401om11p8mf.png",
+      "https://patchwiki.biligame.com/images/ys/9/9b/08xf46yhb6b0tp1cmtwyzc9mylhr26a.png",
+      "https://patchwiki.biligame.com/images/ys/4/47/52eqvlkxs5qjocw4t1hbwcknal2nod0.png",
+      "https://patchwiki.biligame.com/images/ys/b/be/1z6zvr0hm38xxbox5w9jml0m4egyrtf.png",
+      "https://patchwiki.biligame.com/images/ys/5/57/sv8bmu0a5q93z3ysygb36jpkvxrc7p3.png",
+      "https://patchwiki.biligame.com/images/ys/2/2a/q0m21x2crtje9rmmfitzvn38delnkaf.png"
+    ]
   },
   {
     "name": "诺艾尔",
     "nation": "蒙德",
     "birthday": "03-21",
-    "image": "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/19b8b377601a039e2ce5bab2f4771c7b_6593001839488888030.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp"
+    "images": [
+      "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/19b8b377601a039e2ce5bab2f4771c7b_6593001839488888030.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp",
+      "https://patchwiki.biligame.com/images/ys/0/0b/p92nnuvz800om3fnvd41z2gfo9uhk55.png",
+      "https://patchwiki.biligame.com/images/ys/7/7e/c86ll47sa97db4xazluu5gsc6gsyird.png",
+      "https://patchwiki.biligame.com/images/ys/8/8f/ecq0er4l22xgjn5gdax1e2ssyaz1h2y.png",
+      "https://patchwiki.biligame.com/images/ys/2/20/sy12dsqkgn1j949mnstmhfk5ls0p7ns.png",
+      "https://patchwiki.biligame.com/images/ys/b/bf/nnxn76w2w5cf650v7ad9ch9dxw9wvgy.png",
+      "https://patchwiki.biligame.com/images/ys/0/05/4c20fwsdeexjejn9fom7pf5ullt2yfa.png",
+      "https://patchwiki.biligame.com/images/ys/c/cf/2hjokhns6317m0fvourlmakbeccwlsh.png"
+    ]
   },
   {
     "name": "菲谢尔",
     "nation": "蒙德",
     "birthday": "05-27",
-    "image": "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/363e41c96c3d80a083e8c478dce8c043_8434967507951967883.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp"
+    "images": [
+      "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/363e41c96c3d80a083e8c478dce8c043_8434967507951967883.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp",
+      "https://patchwiki.biligame.com/images/ys/0/00/k0fdyba1uo251nyxwui6kzqdkqy9jp4.png",
+      "https://patchwiki.biligame.com/images/ys/d/d4/2yhyyxt1qmgq2rgeb9ggbsa1swk1y7o.png",
+      "https://patchwiki.biligame.com/images/ys/d/de/gkngye804l2nmz4pngi3zbupel8f69r.png",
+      "https://patchwiki.biligame.com/images/ys/b/b3/ncbrgttet3d27zs7lqvxqmvr569gm2k.png",
+      "https://patchwiki.biligame.com/images/ys/b/b2/6f6fh15vbx3ienblj9j6iafk1f62rq0.png",
+      "https://patchwiki.biligame.com/images/ys/0/0b/ome0gn2gcxd8lp8xqkm0tc33a8xxdg4.png",
+      "https://patchwiki.biligame.com/images/ys/d/da/n2838i1ouqfc6yqp2tn6hpd3yd015ej.png"
+    ]
   },
   {
     "name": "砂糖",
     "nation": "蒙德",
     "birthday": "11-26",
-    "image": "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/6976af5db02fb864027007283c44c86d_6367216792198349343.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp"
+    "images": [
+      "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/6976af5db02fb864027007283c44c86d_6367216792198349343.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp",
+      "https://patchwiki.biligame.com/images/ys/c/cf/m60bhi246du25gvdt75qhqnsxut871a.png",
+      "https://patchwiki.biligame.com/images/ys/f/f6/3vlyq6valhmuqf4q8ppsurw17nbitfd.png",
+      "https://patchwiki.biligame.com/images/ys/7/71/kggi1kzbcy9mkt4d5r5box3sjr4wdt9.png",
+      "https://patchwiki.biligame.com/images/ys/3/3e/fx31irmb9r73aztvlkyz8mhf1pkrdo3.png",
+      "https://patchwiki.biligame.com/images/ys/b/b5/tkfretmod8rclxomoh4klx56gum8mdr.png",
+      "https://patchwiki.biligame.com/images/ys/9/9a/gd9v8r0i01ckm4vy1imsxz8xaxyiexc.png"
+    ]
   },
   {
     "name": "迪奥娜",
     "nation": "蒙德",
     "birthday": "01-18",
-    "image": "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/d9273c1a61c446994773f7942beed1d4_8404092942110031495.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp"
+    "images": [
+      "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/d9273c1a61c446994773f7942beed1d4_8404092942110031495.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp",
+      "https://patchwiki.biligame.com/images/ys/f/f2/o61608ldl9hkhqq092a0bck974guuuo.png",
+      "https://patchwiki.biligame.com/images/ys/4/40/1l7ot23hqeorm5m4xqpsjlr13j70rpu.png",
+      "https://patchwiki.biligame.com/images/ys/3/3d/4bqmn6p7e7715jtlchi6ui76x1fwap3.png",
+      "https://patchwiki.biligame.com/images/ys/d/d7/d1hpr48m3nivc91epx5mmq9uit0seul.png",
+      "https://patchwiki.biligame.com/images/ys/8/8b/kfpjdp0ejbe1khk4ynxja07amfo097u.png",
+      "https://patchwiki.biligame.com/images/ys/8/89/dywsiylxh4w35hzfject90rnzy4dx7w.png"
+    ]
   },
   {
     "name": "阿贝多",
     "nation": "蒙德",
     "birthday": "09-13",
-    "image": "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/6e55f1b6f7b5ad580ec11b63aab2fa0c_685983993390724324.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp"
+    "images": [
+      "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/6e55f1b6f7b5ad580ec11b63aab2fa0c_685983993390724324.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp",
+      "https://patchwiki.biligame.com/images/ys/0/0d/3oox5ivgqbuakpf53i1039o35z0821z.png",
+      "https://patchwiki.biligame.com/images/ys/b/b1/kykwlvalwmx7eyi6ljwex4gad9xdscw.png",
+      "https://patchwiki.biligame.com/images/ys/d/d5/4oug7hr547e8paj83p6fnjd9wuqah40.png",
+      "https://patchwiki.biligame.com/images/ys/b/b4/9xs3vt5xkic7kfradcp7ubx72z5x3ti.png",
+      "https://patchwiki.biligame.com/images/ys/2/25/4yq2r9navd24s1lhz5unz06p6ruyw0u.png",
+      "https://patchwiki.biligame.com/images/ys/b/b0/krbf52xwcc1ls0t6qq6o1gl8tjqm0dp.png"
+    ]
   },
   {
     "name": "罗莎莉亚",
     "nation": "蒙德",
     "birthday": "01-24",
-    "image": "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/cede3149966e2f483944cc72f213932b_5684644131117993694.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp"
+    "images": [
+      "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/cede3149966e2f483944cc72f213932b_5684644131117993694.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp",
+      "https://patchwiki.biligame.com/images/ys/2/21/dbw3ud8y5zmf2qkytd2jtcxh82dckoa.png",
+      "https://patchwiki.biligame.com/images/ys/b/b6/0usxtawuoo6b9sgrblg0tfzajyfkkb4.png",
+      "https://patchwiki.biligame.com/images/ys/e/e1/grnj85g111ut6soj4dukq1d69hzj5sw.png",
+      "https://patchwiki.biligame.com/images/ys/f/f6/p9oc7pqust40fy2oeu1yig4s16sse14.png",
+      "https://patchwiki.biligame.com/images/ys/c/cc/cnr053ba3cmofkforqnpfx0apkaqxwj.png"
+    ]
   },
   {
     "name": "优菈",
     "nation": "蒙德",
     "birthday": "10-25",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/5/50/ej8v3104cmwt4lk4iciq4u5fab2h0se.png/1200px-%E4%BC%98%E8%8F%88%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/5/50/ej8v3104cmwt4lk4iciq4u5fab2h0se.png/1200px-%E4%BC%98%E8%8F%88%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
+      "https://patchwiki.biligame.com/images/ys/7/7d/n46bfq1ojdsi6u1q7i0a68leftda2j1.png",
+      "https://patchwiki.biligame.com/images/ys/c/c2/gzacn8wf3ztz15zyv6tf4yyzppqfi7b.png",
+      "https://patchwiki.biligame.com/images/ys/9/94/7qivzm4h7xn7yemyd8wywx4pi53zbxy.png",
+      "https://patchwiki.biligame.com/images/ys/0/02/9bvmslv7hx7kl6hqvf7m5owrezxhzwg.png",
+      "https://patchwiki.biligame.com/images/ys/4/4e/hiknp2obqoybr4qkigkujufvu00f5yo.png"
+    ]
   },
   {
     "name": "莫娜",
     "nation": "蒙德",
     "birthday": "08-31",
-    "image": "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/833bc780726f651931fa21fe484853af_184290504769854186.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp"
+    "images": [
+      "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/833bc780726f651931fa21fe484853af_184290504769854186.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp",
+      "https://patchwiki.biligame.com/images/ys/8/83/ri4qv51w4d3srsa8b9v3p37l2ershuu.png",
+      "https://patchwiki.biligame.com/images/ys/3/3e/jotki3mir0p09ym7xq9qb89b9xo408t.png",
+      "https://patchwiki.biligame.com/images/ys/d/db/bz5cq1wdzx7htysphlq0zw696l73d8g.png",
+      "https://patchwiki.biligame.com/images/ys/0/06/3bvas0ssr4w04tebl9bjapgknxsstpt.png",
+      "https://patchwiki.biligame.com/images/ys/1/14/hxd3fondqzcqtc9zqxnbgyhjzgnakjn.png",
+      "https://patchwiki.biligame.com/images/ys/3/3a/2fnhkjz3jf2w5bo6xis2o5qndz6fmmd.png",
+      "https://patchwiki.biligame.com/images/ys/0/05/emmhd2fxmc57us9e3xykvm6482fftxm.png"
+    ]
   },
   {
     "name": "米卡",
     "nation": "蒙德",
     "birthday": "08-11",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/e/e5/1yt3wz7ab753algoxbvrd16sk2wtl73.png/1200px-%E7%B1%B3%E5%8D%A1%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/e/e5/1yt3wz7ab753algoxbvrd16sk2wtl73.png/1200px-%E7%B1%B3%E5%8D%A1%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
+      "https://patchwiki.biligame.com/images/ys/0/05/srtiubhipdpsgc8ctlrk0wj99rcg2o4.png",
+      "https://patchwiki.biligame.com/images/ys/6/6e/s0ka9yo2o29xvhywi3242kwhp3wupo2.png",
+      "https://patchwiki.biligame.com/images/ys/8/89/3nhbsubbakdswobe6rnzljkc07wl11j.png",
+      "https://patchwiki.biligame.com/images/ys/9/91/8ky8nn1u9zc1fug36umezhe46dqucge.png"
+    ]
   },
   {
     "name": "塔利雅",
     "nation": "蒙德",
     "birthday": "05-25",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/a/aa/cyb1r1yiqjg4fifu8gu80yz8tc9uiea.png/1200px-%E5%A1%94%E5%88%A9%E9%9B%85%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/a/aa/cyb1r1yiqjg4fifu8gu80yz8tc9uiea.png/1200px-%E5%A1%94%E5%88%A9%E9%9B%85%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
+      "https://patchwiki.biligame.com/images/ys/4/4c/c8qral2vy2z34ndp7s4tsp4tfx5jjky.png"
+    ]
   },
   {
     "name": "钟离",
     "nation": "璃月",
     "birthday": "12-31",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/9/9e/a2ghv2y1wf92b0zxofvgcenmn1bfu3e.png/1200px-%E9%92%9F%E7%A6%BB%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/9/9e/a2ghv2y1wf92b0zxofvgcenmn1bfu3e.png/1200px-%E9%92%9F%E7%A6%BB%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
+      "https://patchwiki.biligame.com/images/ys/9/9c/k2w015icih92noiqrec1xwruyr4l8ry.png",
+      "https://patchwiki.biligame.com/images/ys/2/29/jjybh5c5mkg1mru90y48ubuejfvhh1e.png",
+      "https://patchwiki.biligame.com/images/ys/0/06/5tufy6wrxmk38r8lep29ogldojje7qs.png",
+      "https://patchwiki.biligame.com/images/ys/5/54/5ugv3k2cf19erjniez5bc22twodmfm3.png",
+      "https://patchwiki.biligame.com/images/ys/d/de/mlnxre3vc3cnzkxnb5yn2doq9ql5n34.png",
+      "https://patchwiki.biligame.com/images/ys/2/27/oihnn9uaepmahi7xx73c3urbn1jz98k.png"
+    ]
   },
   {
     "name": "凝光",
     "nation": "璃月",
     "birthday": "08-26",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/3/38/2ydmdrrld0u8s2h8u6qjun63qcr090n.png/1200px-%E5%87%9D%E5%85%89%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/3/38/2ydmdrrld0u8s2h8u6qjun63qcr090n.png/1200px-%E5%87%9D%E5%85%89%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
+      "https://patchwiki.biligame.com/images/ys/3/39/hmycqb6r2w43ccu7kp00rheflzriq52.png",
+      "https://patchwiki.biligame.com/images/ys/b/b7/ev2i0lr8s1fxwkqqbb9wni6vra7g95u.png",
+      "https://patchwiki.biligame.com/images/ys/a/af/jfdt19kz4zknlgji5khj92d5v4vq40w.png",
+      "https://patchwiki.biligame.com/images/ys/b/b3/cjjr1efy8dgm7g4bk4y8y8c4op34j9b.png",
+      "https://patchwiki.biligame.com/images/ys/2/2e/jj8cfpvfrix61vr85rtysoca81lhppd.png",
+      "https://patchwiki.biligame.com/images/ys/f/fc/2jwppxz5gcsk15radno3s8vp52w2sxf.png",
+      "https://patchwiki.biligame.com/images/ys/9/9b/0s3n44a65ybx7akghdmsaurochbnoxb.png"
+    ]
   },
   {
     "name": "北斗",
     "nation": "璃月",
     "birthday": "02-14",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/5/5d/f7ak6xcy4b8jpx28yesn9hft9j2g83p.png/1200px-%E5%8C%97%E6%96%97%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/5/5d/f7ak6xcy4b8jpx28yesn9hft9j2g83p.png/1200px-%E5%8C%97%E6%96%97%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
+      "https://patchwiki.biligame.com/images/ys/0/0e/mgid3lslbrykavvsptlqpuo6ti9qlnu.png",
+      "https://patchwiki.biligame.com/images/ys/9/9f/azlzvudrei720koq5iw1itrxcr7s3vi.png",
+      "https://patchwiki.biligame.com/images/ys/1/15/6mcjdflhrwqulnkof63l1z2qnkzsdq3.png",
+      "https://patchwiki.biligame.com/images/ys/a/a0/btb70blic3xanwhrdkn5rf30jtwx20g.png",
+      "https://patchwiki.biligame.com/images/ys/0/07/m5yys66c33vlvhodkh199q5yk7s0pl8.png",
+      "https://patchwiki.biligame.com/images/ys/a/ad/pld0yrgd5tfcp344xkuv2pplo3p55t2.png"
+    ]
   },
   {
     "name": "香菱",
     "nation": "璃月",
     "birthday": "11-02",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/b/bc/4rbb4w3wtkkn58kdlcvy67v9vll1oii.png/1200px-%E9%A6%99%E8%8F%B1%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/b/bc/4rbb4w3wtkkn58kdlcvy67v9vll1oii.png/1200px-%E9%A6%99%E8%8F%B1%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
+      "https://patchwiki.biligame.com/images/ys/8/8d/70y5vy6efopwdy4ywlhl545clfr0rfp.png",
+      "https://patchwiki.biligame.com/images/ys/a/ac/of1vidavxdrw50rfqhg1ej6r0a2vays.png",
+      "https://patchwiki.biligame.com/images/ys/f/fb/3oj25bkw5zsryhhh7cw4y5e4ii90ein.png",
+      "https://patchwiki.biligame.com/images/ys/d/d0/am6kswey9tibvvci0ran9jvmtd4ql9l.png",
+      "https://patchwiki.biligame.com/images/ys/c/c1/dhhojv4pesxidixpgi07xv37ko1byb0.png",
+      "https://patchwiki.biligame.com/images/ys/9/93/m4eeig5scnb2t0358qbeg0uhskn4g1t.png"
+    ]
   },
   {
     "name": "行秋",
     "nation": "璃月",
     "birthday": "10-09",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/b/b0/6ejxlb6ewx7jtbru1wf7j2knn0v3xat.png/1200px-%E8%A1%8C%E7%A7%8B%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/b/b0/6ejxlb6ewx7jtbru1wf7j2knn0v3xat.png/1200px-%E8%A1%8C%E7%A7%8B%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
+      "https://patchwiki.biligame.com/images/ys/f/fc/bwq0remw3mujrhrf07q6uxiay0iih0p.png",
+      "https://patchwiki.biligame.com/images/ys/d/da/31ewotd7bllyybi2cf7aplnox2v2vmp.png",
+      "https://patchwiki.biligame.com/images/ys/9/9b/gv21uxthhj8nzmyf821iuruvd8v24be.png",
+      "https://patchwiki.biligame.com/images/ys/3/35/p8q86uzdda1nrcdxha6uijiwfmi8hl1.png",
+      "https://patchwiki.biligame.com/images/ys/9/97/p5u6mpbo1hc03yvxdd3dfwdi24a2p75.png",
+      "https://patchwiki.biligame.com/images/ys/f/f0/hfobht7va0a0a5f0nvs2nysqkjc0qe4.png",
+      "https://patchwiki.biligame.com/images/ys/5/52/4vmycwqz3vcms8lrqegcau025m313os.png"
+    ]
   },
   {
     "name": "重云",
     "nation": "璃月",
     "birthday": "09-07",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/7/73/gqa6ud0np0ji3nti05q4e8tb8e28tyv.png/1200px-%E9%87%8D%E4%BA%91%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/7/73/gqa6ud0np0ji3nti05q4e8tb8e28tyv.png/1200px-%E9%87%8D%E4%BA%91%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
+      "https://patchwiki.biligame.com/images/ys/8/8d/53pg1cct42g5vtugyx7ir6cs35rs3jq.png",
+      "https://patchwiki.biligame.com/images/ys/2/21/ivyw1qxaexlxze8y0va5avzvspej0wi.png",
+      "https://patchwiki.biligame.com/images/ys/0/03/fds3opv62ooe7piekjd1fnx3c9ta3fv.png",
+      "https://patchwiki.biligame.com/images/ys/b/b3/lcc41dz1opn1k3uqkp3veqsoizop1vh.png",
+      "https://patchwiki.biligame.com/images/ys/6/6f/q10l5fptm80tvi5vfttk5jfhln85a44.png",
+      "https://patchwiki.biligame.com/images/ys/5/51/hu9xdsss8o83kad7822rdk4p7yg03ce.png",
+      "https://patchwiki.biligame.com/images/ys/9/97/3p0xizozdst08qtwfwt40yrvkubf4up.png"
+    ]
   },
   {
     "name": "七七",
     "nation": "璃月",
     "birthday": "03-03",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/9/9e/a07s0rx81ej83mtw5btgms66dwirfxq.png/1200px-%E4%B8%83%E4%B8%83%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/9/9e/a07s0rx81ej83mtw5btgms66dwirfxq.png/1200px-%E4%B8%83%E4%B8%83%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
+      "https://patchwiki.biligame.com/images/ys/e/e6/2m3dam4i2y1wxwv3d9aboc6ungh4urd.png",
+      "https://patchwiki.biligame.com/images/ys/6/66/20s54e4xoe5bv660kif05se7b3ut1a7.png",
+      "https://patchwiki.biligame.com/images/ys/c/c0/t1rhza2r9ttbgg4qllm311i4iz8t1ha.png",
+      "https://patchwiki.biligame.com/images/ys/d/d6/3pwox8s65lpq466xgr3tia9jb07ys86.png",
+      "https://patchwiki.biligame.com/images/ys/a/a0/pxe8g13jemg37ftyl40n7k3heplv9ud.png",
+      "https://patchwiki.biligame.com/images/ys/4/4c/06lolp0d2a2xbk14wxvljq4nbshqpda.png"
+    ]
   },
   {
     "name": "刻晴",
     "nation": "璃月",
     "birthday": "11-20",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/2/21/p163qpi54cviea6v8eohvfh9kuqn90p.png/1200px-%E5%88%BB%E6%99%B4%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/2/21/p163qpi54cviea6v8eohvfh9kuqn90p.png/1200px-%E5%88%BB%E6%99%B4%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
+      "https://patchwiki.biligame.com/images/ys/c/c7/be5nyfvfie2dah1udxrrlsb09sm2fyf.png",
+      "https://patchwiki.biligame.com/images/ys/c/c8/orzsr3k1uf6a4uqtjxzcn4tz9y1u7gj.png",
+      "https://patchwiki.biligame.com/images/ys/f/fe/shr85m2jpf1jb0vfol3owd6ux149qir.png",
+      "https://patchwiki.biligame.com/images/ys/b/b0/i5k5vw6bjviqe1vgnkfxj7hrkp9z8lf.png",
+      "https://patchwiki.biligame.com/images/ys/d/d2/5ie9uqo1nsr1t8127fcuzij9m00747p.png",
+      "https://patchwiki.biligame.com/images/ys/8/8b/9lwmjbqdn1uxsui65v2ee80llwnkf66.png"
+    ]
   },
   {
     "name": "烟绯",
     "nation": "璃月",
     "birthday": "07-28",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/5/55/g5tkq72alialfo730s2qw2x2yo3h92g.png/1200px-%E7%83%9F%E7%BB%AF%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/5/55/g5tkq72alialfo730s2qw2x2yo3h92g.png/1200px-%E7%83%9F%E7%BB%AF%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
+      "https://patchwiki.biligame.com/images/ys/2/24/tpxgi8ksziddyjsg7nuvu1mayovrzfo.png",
+      "https://patchwiki.biligame.com/images/ys/2/25/gws0cl8cjrko44tom5sffqrldrnxyn2.png",
+      "https://patchwiki.biligame.com/images/ys/a/ad/i5foqa9lb88r4yjtozhnw3z4xh165x0.png",
+      "https://patchwiki.biligame.com/images/ys/e/e7/198fzktimm6tgdm3g9n7a4mf8d6cftb.png",
+      "https://patchwiki.biligame.com/images/ys/6/69/bfgcrm150nxgrf88jhqk8ruqag8xfnf.png",
+      "https://patchwiki.biligame.com/images/ys/b/ba/e6phagaq62ti2sirkfkg0nmfl9wyzfi.png"
+    ]
   },
   {
     "name": "甘雨",
     "nation": "璃月",
     "birthday": "12-02",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/d/da/80cmpy7ubhja1o81nx67709701et0fe.png/1200px-%E7%94%98%E9%9B%A8%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/d/da/80cmpy7ubhja1o81nx67709701et0fe.png/1200px-%E7%94%98%E9%9B%A8%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
+      "https://patchwiki.biligame.com/images/ys/c/ce/pusw3uc2fdzh19ycqgcrh6ixudiwifq.png",
+      "https://patchwiki.biligame.com/images/ys/e/e6/81xmlyj2iejvb3hfdtsjlvu9ryr2r81.png",
+      "https://patchwiki.biligame.com/images/ys/0/09/2vktkrndxesm19qkkx8353uf0x5yi9p.png",
+      "https://patchwiki.biligame.com/images/ys/2/26/g04iiupf70skzgg7rqta8grpncgwt0d.png",
+      "https://patchwiki.biligame.com/images/ys/2/2a/mlas0mbg6kc8vh2tuai8r9e1gjobo93.png"
+    ]
   },
   {
     "name": "胡桃",
     "nation": "璃月",
     "birthday": "07-15",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/f/f8/81z6247pn39kw3iyhss34977vlkxgvd.png/1200px-%E8%83%A1%E6%A1%83%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/f/f8/81z6247pn39kw3iyhss34977vlkxgvd.png/1200px-%E8%83%A1%E6%A1%83%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
+      "https://patchwiki.biligame.com/images/ys/2/25/4s72pq05iolzv86jq7ekixbndl328fb.png",
+      "https://patchwiki.biligame.com/images/ys/d/d0/7wceglsoievzhkuoa4td9rjd0fvfjf5.png",
+      "https://patchwiki.biligame.com/images/ys/7/77/fiptp30hkdi7mbkgxbewc7jngjp9kxj.png",
+      "https://patchwiki.biligame.com/images/ys/5/54/3epa6cued19koaf0ps0r0bhvz58p7ki.png",
+      "https://patchwiki.biligame.com/images/ys/3/3c/r3kwzypaic6rjtj9a4a21c8l5ia1to1.png",
+      "https://patchwiki.biligame.com/images/ys/1/1b/5dzi8u2rqmso1u2xjahmivhqqqk2koo.png"
+    ]
   },
   {
     "name": "魈",
     "nation": "璃月",
     "birthday": "04-17",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/c/c7/aodeicaxmvx44c56cbflizonowwyv9f.png/1200px-%E9%AD%88%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/c/c7/aodeicaxmvx44c56cbflizonowwyv9f.png/1200px-%E9%AD%88%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
+      "https://patchwiki.biligame.com/images/ys/7/7e/2ukmybwmjiwahqzk4072dmfzgnniah3.png",
+      "https://patchwiki.biligame.com/images/ys/9/9a/hwoi2s9b80j5cb2i88725dg952fx47u.png",
+      "https://patchwiki.biligame.com/images/ys/0/0e/01ynujuv8h1vlsmblrbvitm4h5xa26s.png",
+      "https://patchwiki.biligame.com/images/ys/2/29/ftep0ysk4lhhe65osa7un32h9ebthih.png",
+      "https://patchwiki.biligame.com/images/ys/e/e9/1wbc8qorzuypmtv2fsh4z3ml2894wbq.png",
+      "https://patchwiki.biligame.com/images/ys/c/c2/q38y2w6jf1aguv0di7bz9yk13smoqzg.png",
+      "https://patchwiki.biligame.com/images/ys/1/10/ipyz9z5dufya25vmsyitkgu4skakd1h.png"
+    ]
   },
   {
     "name": "申鹤",
     "nation": "璃月",
     "birthday": "03-10",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/a/a8/skhfkgcgbldvk62j66x9wc1tqcamx2u.png/1200px-%E7%94%B3%E9%B9%A4%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/a/a8/skhfkgcgbldvk62j66x9wc1tqcamx2u.png/1200px-%E7%94%B3%E9%B9%A4%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
+      "https://patchwiki.biligame.com/images/ys/1/1e/3b78dqmytgv2tz7sxup3blwzgdg0kjl.png",
+      "https://patchwiki.biligame.com/images/ys/a/a0/3hfln5pm3bbi70y95bun3lne6unmlfn.png",
+      "https://patchwiki.biligame.com/images/ys/1/13/f84ttykpm1l7io1vyc9je1vv1uf1zma.png",
+      "https://patchwiki.biligame.com/images/ys/a/aa/tq51jvobqcbtpip2gdc1w8d6kqtfuby.png",
+      "https://patchwiki.biligame.com/images/ys/1/1d/doyy70jgohb5fwi30ssfshz3ns5p53h.png"
+    ]
   },
   {
     "name": "云堇",
     "nation": "璃月",
     "birthday": "05-21",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/a/aa/jyxi5vjit6z3sdws78l7nmucrrmgm4u.png/1200px-%E4%BA%91%E5%A0%87%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/a/aa/jyxi5vjit6z3sdws78l7nmucrrmgm4u.png/1200px-%E4%BA%91%E5%A0%87%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
+      "https://patchwiki.biligame.com/images/ys/e/e7/rc1w4oe443rq3txkaaqr0wj3eae5mka.png",
+      "https://patchwiki.biligame.com/images/ys/5/54/nbmkmd2ion6orhc8ud01ku0cd440r1i.png",
+      "https://patchwiki.biligame.com/images/ys/6/67/hdi17v00cnp3my81w9txmb9idbjxluw.png",
+      "https://patchwiki.biligame.com/images/ys/f/f7/23nm4pti7j3uz9s1jvrkmtez58ch8c2.png",
+      "https://patchwiki.biligame.com/images/ys/0/0e/81hpy1qphbrnfrrii2fei2e3uwh2fzy.png"
+    ]
   },
   {
     "name": "夜兰",
     "nation": "璃月",
     "birthday": "04-20",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/a/a5/hx77v5nkgd0gry1kxro6iu7rmp2qhpk.png/1200px-%E5%A4%9C%E5%85%B0%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/a/a5/hx77v5nkgd0gry1kxro6iu7rmp2qhpk.png/1200px-%E5%A4%9C%E5%85%B0%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
+      "https://patchwiki.biligame.com/images/ys/e/eb/680g21pc7o4n877tyk6p4g1ebtl1bla.png",
+      "https://patchwiki.biligame.com/images/ys/6/6a/pg26df22j4j994yi7050sn5o7w5c2t5.png",
+      "https://patchwiki.biligame.com/images/ys/0/09/8jbazw6oztgzj3mmsvh54io2rjizg8a.png",
+      "https://patchwiki.biligame.com/images/ys/8/8c/282opne2x31h4sfajxdskgj4eqos5ur.png"
+    ]
   },
   {
     "name": "瑶瑶",
     "nation": "璃月",
     "birthday": "03-06",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/7/7e/5d1rrp2h3r1c2p8ut3evp1wp7qyj14k.png/1200px-%E7%91%B6%E7%91%B6%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/7/7e/5d1rrp2h3r1c2p8ut3evp1wp7qyj14k.png/1200px-%E7%91%B6%E7%91%B6%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
+      "https://patchwiki.biligame.com/images/ys/b/be/nqlhwnczyu67g4z30kab249ig8u8y55.png",
+      "https://patchwiki.biligame.com/images/ys/d/df/0dpxd4icyqq0bel6mqtvk2yugg79ggw.png",
+      "https://patchwiki.biligame.com/images/ys/c/c8/66j1ui4x6pn5oh5gw7hi3tdjvv1xifq.png",
+      "https://patchwiki.biligame.com/images/ys/6/6e/f25k79htzz2ftczdgexr998f2p6gebd.png"
+    ]
   },
   {
     "name": "白术",
     "nation": "璃月",
     "birthday": "04-25",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/d/dc/hd32prl6c6znvbomzs72nxspovevccr.png/1200px-%E7%99%BD%E6%9C%AF%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/d/dc/hd32prl6c6znvbomzs72nxspovevccr.png/1200px-%E7%99%BD%E6%9C%AF%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
+      "https://patchwiki.biligame.com/images/ys/b/bd/kt6ysp66mkpp684j2znsbdhvz8lxczh.png",
+      "https://patchwiki.biligame.com/images/ys/2/2d/7vj6ka51lzt7w3120uc84xz8dkazyjw.png",
+      "https://patchwiki.biligame.com/images/ys/7/78/kkbhd0nda3vkfotrlq91p30z5eem40d.png"
+    ]
   },
   {
     "name": "闲云",
     "nation": "璃月",
     "birthday": "04-11",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/5/58/9ud0c2um0p4ilmy23fervltk247hugm.png/1200px-%E9%97%B2%E4%BA%91%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/5/58/9ud0c2um0p4ilmy23fervltk247hugm.png/1200px-%E9%97%B2%E4%BA%91%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
+      "https://patchwiki.biligame.com/images/ys/2/25/81dq51lv3j2x5lkpp1fiqturh0olubf.png",
+      "https://patchwiki.biligame.com/images/ys/5/55/6ayy5h445qk5muv2hq0bz5g34t23wx5.png",
+      "https://patchwiki.biligame.com/images/ys/2/20/tur2tznkryllx6j3ozmi39l7inl61cs.png"
+    ]
   },
   {
     "name": "辛焱",
     "nation": "璃月",
     "birthday": "10-16",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/2/26/37z07lsvns7jpeuxjjd99qxx66wxzyr.png/1200px-%E8%BE%9B%E7%84%B1%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/2/26/37z07lsvns7jpeuxjjd99qxx66wxzyr.png/1200px-%E8%BE%9B%E7%84%B1%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
+      "https://patchwiki.biligame.com/images/ys/9/92/igh9t2z7obx37mp3wn8e9o6b3qrdnlg.png",
+      "https://patchwiki.biligame.com/images/ys/8/84/pelm0fb80roerdntzxdiv7wx0rf9fnp.png",
+      "https://patchwiki.biligame.com/images/ys/5/55/pvekzgnbl5lynfcr8d5kcjcc4ghnfjb.png",
+      "https://patchwiki.biligame.com/images/ys/a/ab/j3tjfvvc30dqmldaymkisz9l7mgo14w.png",
+      "https://patchwiki.biligame.com/images/ys/9/96/2yvkgxifhchpov87x9ps91ym177y13a.png"
+    ]
   },
   {
     "name": "嘉明",
     "nation": "璃月",
     "birthday": "12-22",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/c/c5/87sr2fgmdebr4zrae9ohpxqgbquvjr3.png/1200px-%E5%98%89%E6%98%8E%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/c/c5/87sr2fgmdebr4zrae9ohpxqgbquvjr3.png/1200px-%E5%98%89%E6%98%8E%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
+      "https://patchwiki.biligame.com/images/ys/4/49/if6u8dh5bh9cmdtxz9djpl71k885ps2.png",
+      "https://patchwiki.biligame.com/images/ys/3/34/9tswegsho08dc5kddkr0uhy77a8pbfv.png"
+    ]
   },
   {
     "name": "蓝砚",
     "nation": "璃月",
     "birthday": "01-06",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/e/ee/mzxl5ir7q15xhsm3denbi7pal47xio8.png/1200px-%E8%93%9D%E7%A0%9A%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/e/ee/mzxl5ir7q15xhsm3denbi7pal47xio8.png/1200px-%E8%93%9D%E7%A0%9A%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
+      "https://patchwiki.biligame.com/images/ys/d/d5/qgaw5phbq25hcnwb5y5f3ov18e3q1ej.png"
+    ]
   },
   {
     "name": "兹白",
     "nation": "璃月",
     "birthday": "05-15",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/0/04/1niyyjlaa3m5156282xigfnyjpw9d8s.png/1200px-%E5%85%B9%E7%99%BD%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/0/04/1niyyjlaa3m5156282xigfnyjpw9d8s.png/1200px-%E5%85%B9%E7%99%BD%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
+      "https://patchwiki.biligame.com/images/ys/9/96/gv0ca5rxgckbwk0qbkrg4yhakasrnqt.png"
+    ]
   },
   {
     "name": "雷电将军",
     "nation": "稻妻",
     "birthday": "06-26",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/4/40/p6nf0fmeur6uyzo9b2njc0eah85iqez.png/1200px-%E9%9B%B7%E7%94%B5%E5%B0%86%E5%86%9B%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/4/40/p6nf0fmeur6uyzo9b2njc0eah85iqez.png/1200px-%E9%9B%B7%E7%94%B5%E5%B0%86%E5%86%9B%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
+      "https://patchwiki.biligame.com/images/ys/f/fa/kzn06kofjyu3niq2la7jgrnbp0vd9i4.png",
+      "https://patchwiki.biligame.com/images/ys/e/e6/ks371kw99b6jzwdwhtvgsefecssgtnv.png",
+      "https://patchwiki.biligame.com/images/ys/f/f4/l6iipecq77ihokzo3kui3k40k56hzau.png",
+      "https://patchwiki.biligame.com/images/ys/3/31/l4odnqp7t1cfob0m6qzc6efyw34qp80.png",
+      "https://patchwiki.biligame.com/images/ys/4/40/cnywfxnsvwndafdz9s87nqf95a8jb98.png"
+    ]
   },
   {
     "name": "神里绫华",
     "nation": "稻妻",
     "birthday": "09-28",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/2/2d/5t7bdjldztvz7uws8rlc7qszqmklj5k.png/1200px-%E7%A5%9E%E9%87%8C%E7%BB%AB%E5%8D%8E%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/2/2d/5t7bdjldztvz7uws8rlc7qszqmklj5k.png/1200px-%E7%A5%9E%E9%87%8C%E7%BB%AB%E5%8D%8E%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
+      "https://patchwiki.biligame.com/images/ys/5/5a/g97tb75ek2srf24opl1p7280li9g9zl.png",
+      "https://patchwiki.biligame.com/images/ys/a/ac/6ww4x34pnx0sfg0dicxmpmfip2h45bh.png",
+      "https://patchwiki.biligame.com/images/ys/6/6d/060r8tlvleb5j2rhcryzvl03ig8gr58.png",
+      "https://patchwiki.biligame.com/images/ys/1/16/etpu9qjdxqxycotdbxe6uq9jooa6lpw.png",
+      "https://patchwiki.biligame.com/images/ys/5/50/tvw3yklfyqk1x77pobd051xbvewoekv.png",
+      "https://patchwiki.biligame.com/images/ys/b/b0/ebo8y8gbv0royes6o1o693smrpat9p0.png",
+      "https://patchwiki.biligame.com/images/ys/f/f0/ng5kqid3iv7mcqpmaw3uxm7e855vsyy.png"
+    ]
   },
   {
     "name": "神里绫人",
     "nation": "稻妻",
     "birthday": "03-26",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/1/1b/qnzrbzr1kdh4tvln4lrmllnymyjpioq.png/1200px-%E7%A5%9E%E9%87%8C%E7%BB%AB%E4%BA%BA%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/1/1b/qnzrbzr1kdh4tvln4lrmllnymyjpioq.png/1200px-%E7%A5%9E%E9%87%8C%E7%BB%AB%E4%BA%BA%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
+      "https://patchwiki.biligame.com/images/ys/3/3a/20tp0o45du5n5g0985fvxo8itl5bpuv.png",
+      "https://patchwiki.biligame.com/images/ys/3/3b/fpji8qfenncmuykpzt6v2k1bg23wqhp.png",
+      "https://patchwiki.biligame.com/images/ys/3/3e/egw884aal68pnlypitloxvdqlkzl9ak.png",
+      "https://patchwiki.biligame.com/images/ys/1/1b/f4xmrcgijhekakob57vfjdotdh0qu6i.png"
+    ]
   },
   {
     "name": "宵宫",
     "nation": "稻妻",
     "birthday": "06-21",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/c/ca/ak7wbwvs5dohk0o00ta1p16cw7mqhy5.png/1200px-%E5%AE%B5%E5%AE%AB%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/c/ca/ak7wbwvs5dohk0o00ta1p16cw7mqhy5.png/1200px-%E5%AE%B5%E5%AE%AB%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
+      "https://patchwiki.biligame.com/images/ys/c/c0/3q1g4uw355hxb45x7wrfex1qrn4d721.png",
+      "https://patchwiki.biligame.com/images/ys/7/7f/mtvljnr19u4uw2a6reugp7n676uxv55.png",
+      "https://patchwiki.biligame.com/images/ys/8/86/aqz81fd16s4jf5ygbos051v126g7wp1.png",
+      "https://patchwiki.biligame.com/images/ys/b/b6/ditbl4rzokgl6q8u4t2eu2ahklm5hmh.png",
+      "https://patchwiki.biligame.com/images/ys/d/d0/36arvhei3swiezx2mw1k0nepf50iof3.png"
+    ]
   },
   {
     "name": "枫原万叶",
     "nation": "稻妻",
     "birthday": "10-29",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/2/2e/8axspmt9skhra6q0k1jy5kv2atswoqu.png/1200px-%E6%9E%AB%E5%8E%9F%E4%B8%87%E5%8F%B6%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/2/2e/8axspmt9skhra6q0k1jy5kv2atswoqu.png/1200px-%E6%9E%AB%E5%8E%9F%E4%B8%87%E5%8F%B6%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
+      "https://patchwiki.biligame.com/images/ys/d/dc/5ghku4r1b8vcyguces1b23yze7cd4ed.png",
+      "https://patchwiki.biligame.com/images/ys/3/38/34qag4tpuwwkvdtsvytuxujzpsgtbhf.png",
+      "https://patchwiki.biligame.com/images/ys/1/19/ch61czuqkc0xc7f9h0ehrvh2letnnyg.png",
+      "https://patchwiki.biligame.com/images/ys/f/fb/0hzjjpglx8a9fpx9ciw1hr041wldojf.png",
+      "https://patchwiki.biligame.com/images/ys/3/3f/qnpkjbohnlysogow6zfar2gthxxt9ax.png"
+    ]
   },
   {
     "name": "珊瑚宫心海",
     "nation": "稻妻",
     "birthday": "02-22",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/c/c4/tgx4rcscilxq7sjvnpc47pko176owxp.png/1200px-%E7%8F%8A%E7%91%9A%E5%AE%AB%E5%BF%83%E6%B5%B7%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/c/c4/tgx4rcscilxq7sjvnpc47pko176owxp.png/1200px-%E7%8F%8A%E7%91%9A%E5%AE%AB%E5%BF%83%E6%B5%B7%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
+      "https://patchwiki.biligame.com/images/ys/d/d0/5roncwj2s4stvdhii4c1xiichtz5uap.png",
+      "https://patchwiki.biligame.com/images/ys/5/5e/eao1tm9lexesul5mjn0xuvty2bl539k.png",
+      "https://patchwiki.biligame.com/images/ys/f/f1/04yzbpeeqv58jvfgpajo2nnu43wkogy.png",
+      "https://patchwiki.biligame.com/images/ys/8/8c/pgi86x8ekdc50erimqratxo33yihdco.png",
+      "https://patchwiki.biligame.com/images/ys/0/0a/cdixkwzw13e4xj9v5pdtq8kmfflgqjw.png"
+    ]
   },
   {
     "name": "荒泷一斗",
     "nation": "稻妻",
     "birthday": "06-01",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/4/4b/rfie5tugl47vdpg6l60n2778qcnioa0.png/1200px-%E8%8D%92%E6%B3%B7%E4%B8%80%E6%96%97%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/4/4b/rfie5tugl47vdpg6l60n2778qcnioa0.png/1200px-%E8%8D%92%E6%B3%B7%E4%B8%80%E6%96%97%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
+      "https://patchwiki.biligame.com/images/ys/8/80/aue2090w8aw6k90m5mrws56gehe3iqb.png",
+      "https://patchwiki.biligame.com/images/ys/e/e7/oi5ur7r3g0ifmb5n9032mhy7d7pozee.png",
+      "https://patchwiki.biligame.com/images/ys/0/08/4ffs5ywmtrdrp2s0gp5j5elzwrl35oi.png",
+      "https://patchwiki.biligame.com/images/ys/f/f4/oo9nzu0sj3zsgqvjs0jp41lhpjm1zvx.png",
+      "https://patchwiki.biligame.com/images/ys/0/00/peo98tgwh894u8uikbo0flnf6uwgxaa.png"
+    ]
   },
   {
     "name": "九条裟罗",
     "nation": "稻妻",
     "birthday": "07-14",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/3/30/l99w4mxc9fqxv3raopyfkl0vkowb2rs.png/1200px-%E4%B9%9D%E6%9D%A1%E8%A3%9F%E7%BD%97%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/3/30/l99w4mxc9fqxv3raopyfkl0vkowb2rs.png/1200px-%E4%B9%9D%E6%9D%A1%E8%A3%9F%E7%BD%97%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
+      "https://patchwiki.biligame.com/images/ys/d/dd/3p1e569bfjg1gn7pubm3yqinlwh0z50.png",
+      "https://patchwiki.biligame.com/images/ys/c/cb/f8caeui8nzt8t7rhjvozd3t0innmvw0.png",
+      "https://patchwiki.biligame.com/images/ys/b/bd/nelohblrc8alp1pl1krxx2iz4fjjmp8.png",
+      "https://patchwiki.biligame.com/images/ys/4/40/exlo89ewvvw5xtulv03aiq1fauib5qv.png",
+      "https://patchwiki.biligame.com/images/ys/c/c8/pgicr9u2s1tnw20faghjyb117w8lsiy.png"
+    ]
   },
   {
     "name": "早柚",
     "nation": "稻妻",
     "birthday": "10-19",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/a/a8/6ue1stov5j93gzmxasay9nkihtfyls4.png/1200px-%E6%97%A9%E6%9F%9A%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/a/a8/6ue1stov5j93gzmxasay9nkihtfyls4.png/1200px-%E6%97%A9%E6%9F%9A%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
+      "https://patchwiki.biligame.com/images/ys/7/7d/hpv1jt1jpr3z6xhspscn9em36adi819.png",
+      "https://patchwiki.biligame.com/images/ys/e/e6/batjhhpjwitbkxc95diw75hbqxxhd03.png",
+      "https://patchwiki.biligame.com/images/ys/2/27/tpjgap6fkqwgtlewzdn48noci4ozj5o.png",
+      "https://patchwiki.biligame.com/images/ys/9/96/5wyerxc7t51i09c7j4qddypdhxo21yq.png",
+      "https://patchwiki.biligame.com/images/ys/6/65/rce2g3eo8uoh95rolgp7cnonknnf1n1.png"
+    ]
   },
   {
     "name": "五郎",
     "nation": "稻妻",
     "birthday": "05-18",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/2/20/698pw3rhtlv98wk2nft8lsujnhaaca2.png/1200px-%E4%BA%94%E9%83%8E%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/2/20/698pw3rhtlv98wk2nft8lsujnhaaca2.png/1200px-%E4%BA%94%E9%83%8E%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
+      "https://patchwiki.biligame.com/images/ys/c/c6/ob8qog60s9om2pbchb3z0cto5jpxwfs.png",
+      "https://patchwiki.biligame.com/images/ys/4/4b/nehhtfz6wllkmorlkvaarvny25d23iv.png",
+      "https://patchwiki.biligame.com/images/ys/1/10/2hvwix5p9trophmjgvl2qojkfucjtxh.png",
+      "https://patchwiki.biligame.com/images/ys/0/08/2qvgefvwb9jx3o1lvcswqyylj4u52eh.png",
+      "https://patchwiki.biligame.com/images/ys/c/c4/2kjmbahxjtvioj83bbbul73lu6k62rz.png"
+    ]
   },
   {
     "name": "八重神子",
     "nation": "稻妻",
     "birthday": "06-27",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/3/3d/hy9x8mzx00o8oj5iysddzh36r460eo5.png/1200px-%E5%85%AB%E9%87%8D%E7%A5%9E%E5%AD%90%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/3/3d/hy9x8mzx00o8oj5iysddzh36r460eo5.png/1200px-%E5%85%AB%E9%87%8D%E7%A5%9E%E5%AD%90%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
+      "https://patchwiki.biligame.com/images/ys/e/e7/i6fbrq4ecp406ow3ehxsefsjc8zfwsu.png",
+      "https://patchwiki.biligame.com/images/ys/f/fb/5vo3e9bdj7ja5fybsdpg5usx76zgm38.png",
+      "https://patchwiki.biligame.com/images/ys/8/8e/iimq3t3fsyr3bi2ef83fqpyg9nbjugs.png",
+      "https://patchwiki.biligame.com/images/ys/3/3d/1l3fop88uzbj062bylsmmcr45oz145j.png",
+      "https://patchwiki.biligame.com/images/ys/1/1f/gjvxu45fif9m9g692rppoueooe9rf9v.png"
+    ]
   },
   {
     "name": "久岐忍",
     "nation": "稻妻",
     "birthday": "07-27",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/2/2e/a1uwcgjdfzq91yayyf2h3vzzhxl82fk.png/1200px-%E4%B9%85%E5%B2%90%E5%BF%8D%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/2/2e/a1uwcgjdfzq91yayyf2h3vzzhxl82fk.png/1200px-%E4%B9%85%E5%B2%90%E5%BF%8D%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
+      "https://patchwiki.biligame.com/images/ys/2/2c/ma40rtj9sfe5ddfy2udsicimxkebcqc.png",
+      "https://patchwiki.biligame.com/images/ys/1/12/4hr7bxyw60q1uotly202wl3whvmg9rl.png",
+      "https://patchwiki.biligame.com/images/ys/3/30/8p4kq4pt0goaoz1gmk2efdgwr83zr6q.png",
+      "https://patchwiki.biligame.com/images/ys/2/20/awja5v8yncmapmp7tyirt0f0xhhrmqp.png",
+      "https://patchwiki.biligame.com/images/ys/a/a1/qtk1a7g6eia1auchxzprcks22brvrun.png"
+    ]
   },
   {
     "name": "鹿野院平藏",
     "nation": "稻妻",
     "birthday": "07-24",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/a/a9/btczophxiavxfkpghlnkka7ljr0hvpf.png/1200px-%E9%B9%BF%E9%87%8E%E9%99%A2%E5%B9%B3%E8%97%8F%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/a/a9/btczophxiavxfkpghlnkka7ljr0hvpf.png/1200px-%E9%B9%BF%E9%87%8E%E9%99%A2%E5%B9%B3%E8%97%8F%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
+      "https://patchwiki.biligame.com/images/ys/1/14/h2a077r7yfnauw4xazqo0y8qfn92j0l.png",
+      "https://patchwiki.biligame.com/images/ys/8/8a/r076xyx0uy9hrh53i1atd8y203y1l2q.png",
+      "https://patchwiki.biligame.com/images/ys/2/22/58e0seaa8guhrhtsmv2scphsnd2xgpm.png",
+      "https://patchwiki.biligame.com/images/ys/6/69/h73hfjvaj3voco0wsqip9k5qbz1vg1p.png",
+      "https://patchwiki.biligame.com/images/ys/2/2b/7aai96hh88c9vvay4b3dbrbayiizhqi.png"
+    ]
   },
   {
     "name": "绮良良",
     "nation": "稻妻",
     "birthday": "01-22",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/2/28/4clwisy16drv8tjlv7zu39dnqx8id9t.png/1200px-%E7%BB%AE%E8%89%AF%E8%89%AF%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/2/28/4clwisy16drv8tjlv7zu39dnqx8id9t.png/1200px-%E7%BB%AE%E8%89%AF%E8%89%AF%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
+      "https://patchwiki.biligame.com/images/ys/8/82/3crlc0q1iwmwmms7fxe1i3ir6orav8u.png",
+      "https://patchwiki.biligame.com/images/ys/9/99/c7prwnugvyixtaxmu51j6o12jhrx7wc.png",
+      "https://patchwiki.biligame.com/images/ys/7/7d/j0rzxx35y01n18oiuw8q7y0aflofrri.png"
+    ]
   },
   {
     "name": "托马",
     "nation": "稻妻",
     "birthday": "01-09",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/1/17/s8loyv7uvtz9o9xyvi78motuuiyzf88.png/1200px-%E6%89%98%E9%A9%AC%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/1/17/s8loyv7uvtz9o9xyvi78motuuiyzf88.png/1200px-%E6%89%98%E9%A9%AC%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
+      "https://patchwiki.biligame.com/images/ys/2/23/qexo1jstt0c45bzz6eoywqrhodxlfh4.png",
+      "https://patchwiki.biligame.com/images/ys/4/4a/dx41x25hqqchdiomau7ogxzjn0dulvx.png",
+      "https://patchwiki.biligame.com/images/ys/e/e0/4r7lmwm52g2nqdu9zmatgubsrq4tfl9.png",
+      "https://patchwiki.biligame.com/images/ys/6/6b/qjst750t7v3qvc52htuuq0yblpofvit.png",
+      "https://patchwiki.biligame.com/images/ys/a/a2/k7emv8c712v53a8bzeq6l5emntn36rz.png"
+    ]
   },
   {
     "name": "梦见月瑞希",
     "nation": "稻妻",
     "birthday": "03-16",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/6/6f/l9s7pilrk0smm4fbc90rac1p0yxqqb9.png/1200px-%E6%A2%A6%E8%A7%81%E6%9C%88%E7%91%9E%E5%B8%8C%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/6/6f/l9s7pilrk0smm4fbc90rac1p0yxqqb9.png/1200px-%E6%A2%A6%E8%A7%81%E6%9C%88%E7%91%9E%E5%B8%8C%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
+      "https://patchwiki.biligame.com/images/ys/8/8c/48eq3a77yyhsbgkp1uag7woqnglz9we.jpg",
+      "https://patchwiki.biligame.com/images/ys/c/ce/1xxslv12wz7dwpf0ssizin2p5itzh8s.png"
+    ]
   },
   {
     "name": "千织",
     "nation": "稻妻",
     "birthday": "08-17",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/6/6b/i4gqk9xqqpngo5z2yph372obd25qhju.png/1200px-%E5%8D%83%E7%BB%87%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/6/6b/i4gqk9xqqpngo5z2yph372obd25qhju.png/1200px-%E5%8D%83%E7%BB%87%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
+      "https://patchwiki.biligame.com/images/ys/6/63/agifx06b0ia53s1252jaby2vyzr3k3p.png",
+      "https://patchwiki.biligame.com/images/ys/9/94/porjmhhdiqjxnxigce2dxhi0sm9ukn4.png",
+      "https://patchwiki.biligame.com/images/ys/6/64/mdk0bje4gm5vrzrnrc0hi278uk6l2fg.png"
+    ]
   },
   {
     "name": "纳西妲",
     "nation": "须弥",
     "birthday": "10-27",
-    "image": "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/72bbf4182fb00050831eb3daeb3dc399_1448444344327077034.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp"
+    "images": [
+      "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/72bbf4182fb00050831eb3daeb3dc399_1448444344327077034.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp",
+      "https://patchwiki.biligame.com/images/ys/e/e3/bev8h44gdpkavw6rysga6mdxeuhijle.png",
+      "https://patchwiki.biligame.com/images/ys/a/ac/4cramknzbgmn8nol3w5ra4so52c6cxv.png",
+      "https://patchwiki.biligame.com/images/ys/d/d3/gwr39s7crykk9rfy4n9we2n97l8hwcz.png"
+    ]
   },
   {
     "name": "艾尔海森",
     "nation": "须弥",
     "birthday": "02-11",
-    "image": "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/ffb9b86bab7187fe710684d320ed340a_7328281658707313605.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp"
+    "images": [
+      "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/ffb9b86bab7187fe710684d320ed340a_7328281658707313605.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp",
+      "https://patchwiki.biligame.com/images/ys/a/af/44cz8opvkd2p4x47mi0tyyv1xgtabu2.png",
+      "https://patchwiki.biligame.com/images/ys/1/1e/bgc3arn40ym11begyx7vlk3eqsehuil.png",
+      "https://patchwiki.biligame.com/images/ys/0/0d/0y7b9a0mutxhtpp5gijkjn8m3h8bhnc.png",
+      "https://patchwiki.biligame.com/images/ys/4/4a/2cxmpmqygri8ddxoy3hfwikpp9fays5.png"
+    ]
   },
   {
     "name": "赛诺",
     "nation": "须弥",
     "birthday": "06-23",
-    "image": "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/923c436b0ae35c0ac892683591518c93_8701764055479519355.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp"
+    "images": [
+      "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/923c436b0ae35c0ac892683591518c93_8701764055479519355.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp",
+      "https://patchwiki.biligame.com/images/ys/3/3f/ro6405en9e89ua6g5ammg7b1gvx00cw.png",
+      "https://patchwiki.biligame.com/images/ys/7/7f/infpmrnrrg9tr3gt2ozezwjlwahgkv9.png",
+      "https://patchwiki.biligame.com/images/ys/a/a7/8gjv4jq042npyyyy67qdykvrkrglm1o.png",
+      "https://patchwiki.biligame.com/images/ys/e/e8/eif2p2mdjcsb409nkzd74n98iklgxyb.png"
+    ]
   },
   {
     "name": "妮露",
     "nation": "须弥",
     "birthday": "12-03",
-    "image": "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/cc60b9185e07dea54e8b8d6740eba75d_7809319089813017104.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp"
+    "images": [
+      "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/cc60b9185e07dea54e8b8d6740eba75d_7809319089813017104.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp",
+      "https://patchwiki.biligame.com/images/ys/0/0b/eooowe36ch18yr4m75kr5zsv7n53my4.png",
+      "https://patchwiki.biligame.com/images/ys/a/af/ktucsz4y1zok50q2n8gir8aa455ydle.png",
+      "https://patchwiki.biligame.com/images/ys/3/31/mq394vpecam6zqu86pweq7oorm3gls5.png",
+      "https://patchwiki.biligame.com/images/ys/c/ce/cozfixarv6fd1lgzyqk8kgmplgu1z0n.png"
+    ]
   },
   {
     "name": "坎蒂丝",
     "nation": "须弥",
     "birthday": "05-03",
-    "image": "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/9368ff9cdee75a750c91965109d558ee_5760647270758762717.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp"
+    "images": [
+      "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/9368ff9cdee75a750c91965109d558ee_5760647270758762717.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp",
+      "https://patchwiki.biligame.com/images/ys/5/5e/td61awh81y6wfnt4a1ja205vtd7yiea.png",
+      "https://patchwiki.biligame.com/images/ys/e/e2/phd2xw7mpqoazwarb2rlhw1moqcg8yv.png",
+      "https://patchwiki.biligame.com/images/ys/c/ce/bk7kfrkh7qckk19tq84wazyqh9ns58w.png",
+      "https://patchwiki.biligame.com/images/ys/e/ee/fcp6civp93a4nmyqxf2rpmx6ocfxszz.png"
+    ]
   },
   {
     "name": "柯莱",
     "nation": "须弥",
     "birthday": "05-08",
-    "image": "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/255a3cb2675060b9028e998db07ba3d7_2528032461505871833.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp"
+    "images": [
+      "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/255a3cb2675060b9028e998db07ba3d7_2528032461505871833.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp",
+      "https://patchwiki.biligame.com/images/ys/b/bb/j62wo2yw76zgr1uptmk93j6pyyz0oaa.png",
+      "https://patchwiki.biligame.com/images/ys/1/12/o8ymi4bjhzkqfzcc5pj9xqs7wtw7m6p.png",
+      "https://patchwiki.biligame.com/images/ys/5/55/c7u6oz5ilf8sr3ihbr1ouinf7c0fxu3.png",
+      "https://patchwiki.biligame.com/images/ys/1/1a/huit5xr7riy922a9g64gmt7t0050t4o.png"
+    ]
   },
   {
     "name": "提纳里",
     "nation": "须弥",
     "birthday": "12-29",
-    "image": "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/3b68f706a0bb82a594e2e6f745ce6f1b_4300386788035218940.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp"
+    "images": [
+      "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/3b68f706a0bb82a594e2e6f745ce6f1b_4300386788035218940.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp",
+      "https://patchwiki.biligame.com/images/ys/c/cc/09vb7yhq7kk890xpdzv7s22hgbjwq3x.png",
+      "https://patchwiki.biligame.com/images/ys/f/fd/8rdpu9ax4y5u84he3o9omc9myabbubj.png",
+      "https://patchwiki.biligame.com/images/ys/7/7c/l2lfi7vbkqa5wyjbdhmkiektcrtu9ef.png",
+      "https://patchwiki.biligame.com/images/ys/f/fb/7akwuf5y6prwlqroj6s9ald6x5103gu.png"
+    ]
   },
   {
     "name": "多莉",
     "nation": "须弥",
     "birthday": "12-21",
-    "image": "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/5c61746469847501e4e64b714e21fa29_6539438103403154237.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp"
+    "images": [
+      "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/5c61746469847501e4e64b714e21fa29_6539438103403154237.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp",
+      "https://patchwiki.biligame.com/images/ys/5/56/bc31p7dgkv4y6nejncq9psvpup9wnlz.png",
+      "https://patchwiki.biligame.com/images/ys/5/53/d5qff790oqamvsdfuy2m8j3gg4vtdez.png",
+      "https://patchwiki.biligame.com/images/ys/0/0d/iafb4sxedsxblwsjxs74941x4b3dc6y.png",
+      "https://patchwiki.biligame.com/images/ys/9/97/g1jvir13moyenkk3xqsv6bnu9ryv16x.png"
+    ]
   },
   {
     "name": "莱依拉",
     "nation": "须弥",
     "birthday": "12-19",
-    "image": "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/32fb51fc05a53c8b45b0ce874c7ecaa8_5949025011801073710.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp"
+    "images": [
+      "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/32fb51fc05a53c8b45b0ce874c7ecaa8_5949025011801073710.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp",
+      "https://patchwiki.biligame.com/images/ys/b/be/h9h8x0ft08o7rp318huxhfcr6cauho9.png",
+      "https://patchwiki.biligame.com/images/ys/7/75/rf7u4yojprj7am1l6wpc9moookyocz9.png",
+      "https://patchwiki.biligame.com/images/ys/c/c6/s77ylvzaoqg0osv9ye5a8o989izztk3.png",
+      "https://patchwiki.biligame.com/images/ys/7/76/gdi4cqzam7t6iczck923rjttvgkihdh.png"
+    ]
   },
   {
     "name": "珐露珊",
     "nation": "须弥",
     "birthday": "08-20",
-    "image": "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/f6df28eb30a669dddf6c8c7ac6e54b26_9183613530230063316.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp"
+    "images": [
+      "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/f6df28eb30a669dddf6c8c7ac6e54b26_9183613530230063316.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp",
+      "https://patchwiki.biligame.com/images/ys/a/a9/0a55rd5nhk6sje2gn74wrebnneacz8g.png",
+      "https://patchwiki.biligame.com/images/ys/c/c5/myykcf1dwjttre6adpmac04ohgs22r2.png",
+      "https://patchwiki.biligame.com/images/ys/e/e7/65zngyfuxaz00cvfy6qrlfq43qa99pi.png",
+      "https://patchwiki.biligame.com/images/ys/6/69/34onzqpadt3j5l7vda3e0okysc4z4uh.png"
+    ]
   },
   {
     "name": "卡维",
     "nation": "须弥",
     "birthday": "07-09",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/d/d8/k9sy7d8oy78ivgytnxe0hlz0w1sr9vi.png/1200px-%E5%8D%A1%E7%BB%B4%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/d/d8/k9sy7d8oy78ivgytnxe0hlz0w1sr9vi.png/1200px-%E5%8D%A1%E7%BB%B4%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
+      "https://patchwiki.biligame.com/images/ys/b/b6/q7wfknowcy3j8wqodaxjuvg7q9pw62e.png",
+      "https://patchwiki.biligame.com/images/ys/e/e7/sift2yxg594y9szz9hy4v86dlavsxs3.png",
+      "https://patchwiki.biligame.com/images/ys/7/7e/0kemx77kw87vnplsabqflkwqb6u0p7s.png",
+      "https://patchwiki.biligame.com/images/ys/d/d9/72w70glkdja6s1ij0nalytu133nps8f.png"
+    ]
   },
   {
     "name": "迪希雅",
     "nation": "须弥",
     "birthday": "04-07",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/8/83/46sk6niudrigkaco19g2cea3rz3lddj.png/1200px-%E8%BF%AA%E5%B8%8C%E9%9B%85%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/8/83/46sk6niudrigkaco19g2cea3rz3lddj.png/1200px-%E8%BF%AA%E5%B8%8C%E9%9B%85%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
+      "https://patchwiki.biligame.com/images/ys/5/5d/japqhy02acmlqu9rxblam3pjs1exbku.png",
+      "https://patchwiki.biligame.com/images/ys/3/3f/aua2r3k81mlfs0mdln7f4o1os3ql9gb.png",
+      "https://patchwiki.biligame.com/images/ys/f/f8/52m8xhm45gmpaxnxslctdnmowzxbuyr.png",
+      "https://patchwiki.biligame.com/images/ys/7/7f/79b60lx93fuzlldsktquggg0awvnpad.png"
+    ]
   },
   {
     "name": "赛索斯",
     "nation": "须弥",
     "birthday": "05-31",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/2/2f/o6e3tvf3hpb4848bc6rtiwlo3cesuru.png/1200px-%E8%B5%9B%E7%B4%A2%E6%96%AF%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/2/2f/o6e3tvf3hpb4848bc6rtiwlo3cesuru.png/1200px-%E8%B5%9B%E7%B4%A2%E6%96%AF%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
+      "https://patchwiki.biligame.com/images/ys/9/97/4wm9u5f4h79gqd6dnaip25v1fcpwn87.png",
+      "https://patchwiki.biligame.com/images/ys/0/06/9b49pz3ax3hquxl9op2nzwxc7qamx95.png"
+    ]
   },
   {
     "name": "流浪者",
     "nation": "须弥",
     "birthday": "01-03",
-    "image": "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/d12cf6d2d7c7affada976e70d10a0c50_5281066649940682533.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp"
+    "images": [
+      "https://upload-bbs.miyoushe.com/upload/2024/11/06/322106977/d12cf6d2d7c7affada976e70d10a0c50_5281066649940682533.png?x-oss-process=image/resize,s_600,l_16000/auto-orient,0/interlace,1/quality,q_70/format,webp",
+      "https://patchwiki.biligame.com/images/ys/b/bf/beip6z09ybn0i49bf26m8lw810nykz4.png",
+      "https://patchwiki.biligame.com/images/ys/d/d3/k3zgmmrd1dcsrg3fnbwgkrsheviwxjl.png",
+      "https://patchwiki.biligame.com/images/ys/d/d0/466v32n5t4ta3cuevft5pka8fd1u2v3.png",
+      "https://patchwiki.biligame.com/images/ys/4/49/0u5o9ssiggxopik6xhq54cezyckq1hj.png"
+    ]
   },
   {
     "name": "芙宁娜",
     "nation": "枫丹",
     "birthday": "10-13",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/a/ac/4elolwtt2g03t8qbql9uuh6vzexv1jo.png/1200px-%E8%8A%99%E5%AE%81%E5%A8%9C%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/a/ac/4elolwtt2g03t8qbql9uuh6vzexv1jo.png/1200px-%E8%8A%99%E5%AE%81%E5%A8%9C%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
+      "https://patchwiki.biligame.com/images/ys/8/89/s8dltubvboh981ynwjo6jszgwqf1zwr.png",
+      "https://patchwiki.biligame.com/images/ys/0/01/j0vbuyyo6nkwpp64ui0ssqf9if8gvon.png",
+      "https://patchwiki.biligame.com/images/ys/4/4e/ohrg2u1xhksvr376vc1oiybnvlraug8.png"
+    ]
   },
   {
     "name": "那维莱特",
     "nation": "枫丹",
     "birthday": "12-18",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/b/bb/q18lrpnhiaa2kextqc14p9j72xhls8y.png/1200px-%E9%82%A3%E7%BB%B4%E8%8E%B1%E7%89%B9%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/b/bb/q18lrpnhiaa2kextqc14p9j72xhls8y.png/1200px-%E9%82%A3%E7%BB%B4%E8%8E%B1%E7%89%B9%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
+      "https://patchwiki.biligame.com/images/ys/7/77/qmhlhxvcm16olcuxym22j3lzoedaw21.png",
+      "https://patchwiki.biligame.com/images/ys/9/90/442uji1jsj83dchnsfjxya6y9ooyuf2.png",
+      "https://patchwiki.biligame.com/images/ys/7/7a/eopaw5vz4n064yxus6n76j1g0ce830l.png"
+    ]
   },
   {
     "name": "林尼",
     "nation": "枫丹",
     "birthday": "02-02",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/7/7f/qbhe0nettga7yfi97ndp6v79n1fz6xi.png/1200px-%E6%9E%97%E5%B0%BC%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/7/7f/qbhe0nettga7yfi97ndp6v79n1fz6xi.png/1200px-%E6%9E%97%E5%B0%BC%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
+      "https://patchwiki.biligame.com/images/ys/d/d6/2zot3da543qv70s0vj18p7jx2j4apoq.png",
+      "https://patchwiki.biligame.com/images/ys/c/c5/gsc017dmj8x6ep45ec6rszxova4d41b.png",
+      "https://patchwiki.biligame.com/images/ys/f/f7/q6ach5jftmffoii93u4luimheaar5d1.png"
+    ]
   },
   {
     "name": "琳妮特",
     "nation": "枫丹",
     "birthday": "02-02",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/2/27/htqbidz6atrpb3k3y4q82ni8jehljzu.png/1200px-%E7%90%B3%E5%A6%AE%E7%89%B9%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/2/27/htqbidz6atrpb3k3y4q82ni8jehljzu.png/1200px-%E7%90%B3%E5%A6%AE%E7%89%B9%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
+      "https://patchwiki.biligame.com/images/ys/1/1b/e5yt56nevwbjacq2cixysxhhtv4dvr9.png",
+      "https://patchwiki.biligame.com/images/ys/d/d3/rs98yzw7vky3ecjcuu580jydun2yr9i.png",
+      "https://patchwiki.biligame.com/images/ys/e/e4/d4lk05vlkmkau7fetn37dckh7i3kjz9.png"
+    ]
   },
   {
     "name": "菲米尼",
     "nation": "枫丹",
     "birthday": "09-24",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/6/64/bpajsgn11yjfj2cype9ad0ezilx8yxm.png/1200px-%E8%8F%B2%E7%B1%B3%E5%B0%BC%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/6/64/bpajsgn11yjfj2cype9ad0ezilx8yxm.png/1200px-%E8%8F%B2%E7%B1%B3%E5%B0%BC%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
+      "https://patchwiki.biligame.com/images/ys/7/7c/48b9z97uw4bmlry6g46mlc99e5stkyd.png",
+      "https://patchwiki.biligame.com/images/ys/2/24/olspziswx162ybntkulyv8po61t2et3.png",
+      "https://patchwiki.biligame.com/images/ys/e/e3/o2qej1rckevq7jafnhfqpquhzfpvvfy.png",
+      "https://patchwiki.biligame.com/images/ys/1/1c/t7i5alikl2eeh7qdjnnfu6zqa8mh65r.png"
+    ]
   },
   {
     "name": "娜维娅",
     "nation": "枫丹",
     "birthday": "08-16",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/a/ad/hhqtzmz7auhpr6uh071gzbdbcakghsk.png/1200px-%E5%A8%9C%E7%BB%B4%E5%A8%85%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/a/ad/hhqtzmz7auhpr6uh071gzbdbcakghsk.png/1200px-%E5%A8%9C%E7%BB%B4%E5%A8%85%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
+      "https://patchwiki.biligame.com/images/ys/5/5b/227pmal1qmpfoa9nvkjybfieb5tbb0p.png",
+      "https://patchwiki.biligame.com/images/ys/6/69/rfaf32rkiqxxouxadbuhvkpgdy912zy.png",
+      "https://patchwiki.biligame.com/images/ys/4/46/skt89blbazhl0hob0atvjfd5ujdf8c8.png"
+    ]
   },
   {
     "name": "克洛琳德",
     "nation": "枫丹",
     "birthday": "09-20",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/9/99/lp20ww7qqzy8q6ctnam5q2fm6stegrp.png/1200px-%E5%85%8B%E6%B4%9B%E7%90%B3%E5%BE%B7%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/9/99/lp20ww7qqzy8q6ctnam5q2fm6stegrp.png/1200px-%E5%85%8B%E6%B4%9B%E7%90%B3%E5%BE%B7%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
+      "https://patchwiki.biligame.com/images/ys/1/1b/dpmsx964z2vecvhx9fb09f28wd2a361.png",
+      "https://patchwiki.biligame.com/images/ys/7/7a/aduycmynzgvytsjiut5if33q4autjm8.png",
+      "https://patchwiki.biligame.com/images/ys/6/69/e5aujft1wm3csf0kyi31ttc57i7ycyw.png"
+    ]
   },
   {
     "name": "莱欧斯利",
     "nation": "枫丹",
     "birthday": "11-23",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/b/b3/2lbfry95afhdtr6sver177wr90ukpe1.png/1200px-%E8%8E%B1%E6%AC%A7%E6%96%AF%E5%88%A9%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/b/b3/2lbfry95afhdtr6sver177wr90ukpe1.png/1200px-%E8%8E%B1%E6%AC%A7%E6%96%AF%E5%88%A9%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
+      "https://patchwiki.biligame.com/images/ys/c/c6/eef8ysw9qqexdv7e1f8pisv7gkucehh.png",
+      "https://patchwiki.biligame.com/images/ys/0/04/fchz2485ngf6ht5zhi98cs75elzpj9p.png",
+      "https://patchwiki.biligame.com/images/ys/d/d0/d3s22ph0oyhk6oxhcpga8s4z7tfspv7.png"
+    ]
   },
   {
     "name": "夏洛蒂",
     "nation": "枫丹",
     "birthday": "04-10",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/7/7d/h1dvbabbpt35oo3ils94hv21nbwz4fc.png/1200px-%E5%A4%8F%E6%B4%9B%E8%92%82%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/7/7d/h1dvbabbpt35oo3ils94hv21nbwz4fc.png/1200px-%E5%A4%8F%E6%B4%9B%E8%92%82%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
+      "https://patchwiki.biligame.com/images/ys/6/6a/qj9e365415kur5su2mv0r39sbcm4tmr.png",
+      "https://patchwiki.biligame.com/images/ys/7/75/k7sblwr6or0b0d5f2znwe9vvhno2l8r.png",
+      "https://patchwiki.biligame.com/images/ys/6/64/daivvqmuxnp1o1fhqopufb2kivntt7a.png"
+    ]
   },
   {
     "name": "艾梅莉埃",
     "nation": "枫丹",
     "birthday": "09-22",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/6/61/tixmb998eyafd8tr6potqe5j3pt761b.png/1200px-%E8%89%BE%E6%A2%85%E8%8E%89%E5%9F%83%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/6/61/tixmb998eyafd8tr6potqe5j3pt761b.png/1200px-%E8%89%BE%E6%A2%85%E8%8E%89%E5%9F%83%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
+      "https://patchwiki.biligame.com/images/ys/6/6e/2blnogfdnh7xfuohck6hitk0hc0533c.png",
+      "https://patchwiki.biligame.com/images/ys/f/ff/e43cybqlyyaxrjs1b2ia0iqo61gjfnu.png",
+      "https://patchwiki.biligame.com/images/ys/8/8b/amjpnip1fbuups0lipwxcjoofvyb8v7.png"
+    ]
   },
   {
     "name": "夏沃蕾",
     "nation": "枫丹",
     "birthday": "01-10",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/6/60/ctywsukka685asai2fxlwek40y978hp.png/1200px-%E5%A4%8F%E6%B2%83%E8%95%BE%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/6/60/ctywsukka685asai2fxlwek40y978hp.png/1200px-%E5%A4%8F%E6%B2%83%E8%95%BE%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
+      "https://patchwiki.biligame.com/images/ys/2/2b/7yen8tq5z9hhmgf6jaoq8xoutattfk4.png",
+      "https://patchwiki.biligame.com/images/ys/e/e8/6cdqb27e7ortgszuuatd6h0ezbtorv2.png",
+      "https://patchwiki.biligame.com/images/ys/1/15/stj2bx2abvquszcq7uqc2c5qv70ec87.png"
+    ]
   },
   {
     "name": "希格雯",
     "nation": "枫丹",
     "birthday": "03-30",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/1/1d/sn839y70by5oxjpxb7d2ghrvrpg53lv.png/1200px-%E5%B8%8C%E6%A0%BC%E9%9B%AF%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/1/1d/sn839y70by5oxjpxb7d2ghrvrpg53lv.png/1200px-%E5%B8%8C%E6%A0%BC%E9%9B%AF%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
+      "https://patchwiki.biligame.com/images/ys/f/fb/r3ecoax3li45hrq343mdc2ldi7pospq.png",
+      "https://patchwiki.biligame.com/images/ys/d/d3/6z6t0w7xix5iltr64vv5xoixy87jez3.png"
+    ]
   },
   {
     "name": "爱可菲",
     "nation": "枫丹",
     "birthday": "06-08",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/c/c7/37zfiao6sbm2zta7mvh2u56kr9sodiq.png/1200px-%E7%88%B1%E5%8F%AF%E8%8F%B2%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/c/c7/37zfiao6sbm2zta7mvh2u56kr9sodiq.png/1200px-%E7%88%B1%E5%8F%AF%E8%8F%B2%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
+      "https://patchwiki.biligame.com/images/ys/0/03/3leb88aah8e8p69tb9y7a77cocrz9ij.jpg",
+      "https://patchwiki.biligame.com/images/ys/4/47/jmbvgq7pmjq0wwu1e95rjfkqigu4n48.png"
+    ]
   },
   {
     "name": "玛薇卡",
     "nation": "纳塔",
     "birthday": "08-28",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/8/8d/kodchd9iqqn2hfq8b1cucckhpdcaqqi.png/1200px-%E7%8E%9B%E8%96%87%E5%8D%A1%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/8/8d/kodchd9iqqn2hfq8b1cucckhpdcaqqi.png/1200px-%E7%8E%9B%E8%96%87%E5%8D%A1%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
+      "https://patchwiki.biligame.com/images/ys/3/30/2755tmf5nra1mnn60nr994oc0cbxnzm.png",
+      "https://patchwiki.biligame.com/images/ys/0/08/18rka0awdkfrawaf9zw97ej99uv81x4.png"
+    ]
   },
   {
     "name": "基尼奇",
     "nation": "纳塔",
     "birthday": "11-11",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/1/19/baq5hhc6odttveep456o7u9kqdoivbm.png/1200px-%E5%9F%BA%E5%B0%BC%E5%A5%87%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/1/19/baq5hhc6odttveep456o7u9kqdoivbm.png/1200px-%E5%9F%BA%E5%B0%BC%E5%A5%87%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
+      "https://patchwiki.biligame.com/images/ys/9/9f/4gyej27k508iyjn7wmw62g4lzgrieoe.png",
+      "https://patchwiki.biligame.com/images/ys/e/e7/7dqx3oeqshichnvwq6i073mzc2mq5rt.png"
+    ]
   },
   {
     "name": "欧洛伦",
     "nation": "纳塔",
     "birthday": "10-14",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/5/5b/2yfuhrdg9kzoydt6szw614sexlitta5.png/1200px-%E6%AC%A7%E6%B4%9B%E4%BC%A6%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/5/5b/2yfuhrdg9kzoydt6szw614sexlitta5.png/1200px-%E6%AC%A7%E6%B4%9B%E4%BC%A6%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
+      "https://patchwiki.biligame.com/images/ys/5/5f/be00zp01tdonci0cnp0tjkn4jhs7xw9.png",
+      "https://patchwiki.biligame.com/images/ys/f/f7/hw6haiqj1rnfh9ktk1xt2ysut271wtz.png"
+    ]
   },
   {
     "name": "玛拉妮",
     "nation": "纳塔",
     "birthday": "08-03",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/0/0e/6ytuso69fejc3fqy93jm37jauzn2zbc.png/1200px-%E7%8E%9B%E6%8B%89%E5%A6%AE%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/0/0e/6ytuso69fejc3fqy93jm37jauzn2zbc.png/1200px-%E7%8E%9B%E6%8B%89%E5%A6%AE%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
+      "https://patchwiki.biligame.com/images/ys/a/a3/mt0ifkohk7nu6wjinnzy3tza44s3chc.png",
+      "https://patchwiki.biligame.com/images/ys/9/95/ff9gitl0jvl8v3ngd3wasf4vrmk3wws.png"
+    ]
   },
   {
     "name": "伊安珊",
     "nation": "纳塔",
     "birthday": "08-08",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/2/2e/jfqxgxu8dvtv2cp1x9o7zy91dvhyw9a.png/1200px-%E4%BC%8A%E5%AE%89%E7%8F%8A%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/2/2e/jfqxgxu8dvtv2cp1x9o7zy91dvhyw9a.png/1200px-%E4%BC%8A%E5%AE%89%E7%8F%8A%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
+      "https://patchwiki.biligame.com/images/ys/9/99/s6224dxcel8t3ov4r4zxcib3mkf5op2.png",
+      "https://patchwiki.biligame.com/images/ys/a/aa/i9hp5tunahy1gzkcxrkfjlj2z4fiddc.png"
+    ]
   },
   {
     "name": "恰斯卡",
     "nation": "纳塔",
     "birthday": "12-10",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/8/87/j4r7j7g6wlobhqlrbzt0yijq43y0nkz.png/1200px-%E6%81%B0%E6%96%AF%E5%8D%A1%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/8/87/j4r7j7g6wlobhqlrbzt0yijq43y0nkz.png/1200px-%E6%81%B0%E6%96%AF%E5%8D%A1%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
+      "https://patchwiki.biligame.com/images/ys/3/3a/19hpy1gtv7h5rukqasy0gpd7v136b2a.png",
+      "https://patchwiki.biligame.com/images/ys/8/89/py86eyf6159yxotuyccn13ou1yo3wy6.png"
+    ]
   },
   {
     "name": "瓦雷莎",
     "nation": "纳塔",
     "birthday": "11-15",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/c/c0/94m8ilmrjrzotugcmgmi3r69g7vcxpp.png/1200px-%E7%93%A6%E9%9B%B7%E8%8E%8E%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/c/c0/94m8ilmrjrzotugcmgmi3r69g7vcxpp.png/1200px-%E7%93%A6%E9%9B%B7%E8%8E%8E%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
+      "https://patchwiki.biligame.com/images/ys/0/09/6i4zycaoyc1wwrg4m3604t5tahjaoye.png"
+    ]
   },
   {
     "name": "希诺宁",
     "nation": "纳塔",
     "birthday": "03-13",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/2/21/r68ykvcqtsshriop2u7onp2euuh8ev8.png/1200px-%E5%B8%8C%E8%AF%BA%E5%AE%81%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/2/21/r68ykvcqtsshriop2u7onp2euuh8ev8.png/1200px-%E5%B8%8C%E8%AF%BA%E5%AE%81%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
+      "https://patchwiki.biligame.com/images/ys/e/e6/q1e0ggdgpvecgncfbka3x7oudhdel1c.png",
+      "https://patchwiki.biligame.com/images/ys/b/b2/499b9n7xmowqzyel94s94a42fvj3n4m.png"
+    ]
   },
   {
     "name": "伊法",
     "nation": "纳塔",
     "birthday": "03-23",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/3/3f/3eooznddqyw7goq8pyj7uq8wgg8bk25.png/1200px-%E4%BC%8A%E6%B3%95%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/3/3f/3eooznddqyw7goq8pyj7uq8wgg8bk25.png/1200px-%E4%BC%8A%E6%B3%95%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
+      "https://patchwiki.biligame.com/images/ys/1/14/38qlnc9igvzhc20soh8lokhquz37kb2.png"
+    ]
   },
   {
     "name": "卡齐娜",
     "nation": "纳塔",
     "birthday": "04-22",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/6/6f/b0audskinp19xo7a9ti0exllkwv2vxg.png/1200px-%E5%8D%A1%E9%BD%90%E5%A8%9C%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/6/6f/b0audskinp19xo7a9ti0exllkwv2vxg.png/1200px-%E5%8D%A1%E9%BD%90%E5%A8%9C%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
+      "https://patchwiki.biligame.com/images/ys/3/3d/4yf9a1q6tkmpmscq4d8uns1hd2xelw8.png",
+      "https://patchwiki.biligame.com/images/ys/f/f0/n9mvsg6ji9hbshn4dhw3vq3i64dxxoz.png"
+    ]
   },
   {
     "name": "茜特菈莉",
     "nation": "纳塔",
     "birthday": "01-20",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/e/e0/srjrwy2mjj6raqil39tftplz86v5uvt.png/1200px-%E8%8C%9C%E7%89%B9%E8%8F%88%E8%8E%89%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/e/e0/srjrwy2mjj6raqil39tftplz86v5uvt.png/1200px-%E8%8C%9C%E7%89%B9%E8%8F%88%E8%8E%89%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
+      "https://patchwiki.biligame.com/images/ys/a/a8/1y2ssjdj13j0rd38wrh94s9f0a2btpu.png",
+      "https://patchwiki.biligame.com/images/ys/9/9d/5se4n912h2yy7cu3zp5r7n4zloi5inz.png"
+    ]
   },
   {
     "name": "达达利亚",
     "nation": "至冬",
     "birthday": "07-20",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/5/5c/izckkan4xp0jipykwrotxw8slckyonw.png/1200px-%E8%BE%BE%E8%BE%BE%E5%88%A9%E4%BA%9A%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/5/5c/izckkan4xp0jipykwrotxw8slckyonw.png/1200px-%E8%BE%BE%E8%BE%BE%E5%88%A9%E4%BA%9A%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
+      "https://patchwiki.biligame.com/images/ys/9/9e/7zmur66pm0otmwi1asumb7shidi4y8a.png",
+      "https://patchwiki.biligame.com/images/ys/e/ef/2j9h1as4f8q5cy99n5ndg72a8mmlo5l.png",
+      "https://patchwiki.biligame.com/images/ys/7/78/mexzf8bzb3jr5tnna5fi2sltbwg1uod.png",
+      "https://patchwiki.biligame.com/images/ys/9/99/ege6v4eckliipc7py3j45aqnmemz6c8.png",
+      "https://patchwiki.biligame.com/images/ys/0/07/giuyi6657q0gma27e6faklnmauw6ayq.png",
+      "https://patchwiki.biligame.com/images/ys/7/7d/odqmc69af28py1k69xfhzzycoey7fsh.png"
+    ]
   },
   {
     "name": "阿蕾奇诺",
     "nation": "至冬",
     "birthday": "08-22",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/9/92/s3aeb46uh2ldeamwbg4zcag8vvjtbmc.png/1200px-%E9%98%BF%E8%95%BE%E5%A5%87%E8%AF%BA%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/9/92/s3aeb46uh2ldeamwbg4zcag8vvjtbmc.png/1200px-%E9%98%BF%E8%95%BE%E5%A5%87%E8%AF%BA%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
+      "https://patchwiki.biligame.com/images/ys/3/34/9abknyfcvftm82g38msxqqvyji30tkm.png",
+      "https://patchwiki.biligame.com/images/ys/b/b2/r9u2kjc3zuj81qyz5cp54wyvu1wnk2a.png",
+      "https://patchwiki.biligame.com/images/ys/3/3e/azcioxuk6b9k9l7zjyvg3f7494k6k97.png"
+    ]
   },
   {
     "name": "桑多涅",
     "nation": "至冬",
     "birthday": "01-13",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/9/95/21afqdb120t02zyzrb1s5dt0mz43sqj.png/1920px-%E6%A1%91%E5%A4%9A%E6%B6%85%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/9/95/21afqdb120t02zyzrb1s5dt0mz43sqj.png/1920px-%E6%A1%91%E5%A4%9A%E6%B6%85%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    ]
   },
   {
     "name": "奥黛塔",
     "nation": "至冬",
     "birthday": "02-20",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/6/68/m06hi6a1xn161ykmewxne6y5dtg9ndm.png/1920px-%E5%A5%A5%E9%BB%9B%E5%A1%94%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/6/68/m06hi6a1xn161ykmewxne6y5dtg9ndm.png/1920px-%E5%A5%A5%E9%BB%9B%E5%A1%94%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    ]
   },
   {
     "name": "阿罗夏",
     "nation": "至冬",
     "birthday": "02-09",
-    "image": "https://patchwiki.biligame.com/images/ys/c/c1/sse18oo2pao9eajbzoml2v8r4notahp.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/c/c1/sse18oo2pao9eajbzoml2v8r4notahp.png"
+    ]
   },
   {
     "name": "薇斯纳",
     "nation": "至冬",
     "birthday": "02-04",
-    "image": "https://patchwiki.biligame.com/images/ys/1/1c/2e5zygs40dugbzi9bjjvmw3vnayzqef.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/1/1c/2e5zygs40dugbzi9bjjvmw3vnayzqef.png"
+    ]
   },
   {
     "name": "沃雅妮莎",
     "nation": "至冬",
     "birthday": "03-29",
-    "image": "https://patchwiki.biligame.com/images/ys/5/5d/t96bz0psdgx9aai649uge4tpqj0mj88.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/5/5d/t96bz0psdgx9aai649uge4tpqj0mj88.png"
+    ]
   },
   {
     "name": "哥伦比娅",
     "nation": "挪德卡莱",
     "birthday": "01-14",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/7/7c/d4lmgkm6twg4wr7o1qitzecyga7gzkj.png/1200px-%E5%93%A5%E4%BC%A6%E6%AF%94%E5%A8%85%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/7/7c/d4lmgkm6twg4wr7o1qitzecyga7gzkj.png/1200px-%E5%93%A5%E4%BC%A6%E6%AF%94%E5%A8%85%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
+      "https://patchwiki.biligame.com/images/ys/8/8c/7f99rkwi1k52omb4ghr682r1kntxwr1.png"
+    ]
   },
   {
     "name": "菲林斯",
     "nation": "挪德卡莱",
     "birthday": "10-31",
-    "image": "https://patchwiki.biligame.com/images/ys/0/01/7x5w5kr4mz62nyxxisvi9wm9dthn7rl.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/0/01/7x5w5kr4mz62nyxxisvi9wm9dthn7rl.png"
+    ]
   },
   {
     "name": "菈乌玛",
     "nation": "挪德卡莱",
     "birthday": "03-10",
-    "image": "https://patchwiki.biligame.com/images/ys/8/8e/lpi0rxdt1srx5amlki12502tn2bnb6r.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/8/8e/lpi0rxdt1srx5amlki12502tn2bnb6r.png",
+      "https://patchwiki.biligame.com/images/ys/0/08/9go63abqm1t8r31nj69gz52izf8ix2c.png"
+    ]
   },
   {
     "name": "爱诺",
     "nation": "挪德卡莱",
     "birthday": "09-21",
-    "image": "https://patchwiki.biligame.com/images/ys/5/51/4hzh7cmbq50nw87la981tp84ciafuof.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/5/51/4hzh7cmbq50nw87la981tp84ciafuof.png",
+      "https://patchwiki.biligame.com/images/ys/3/3c/12h8d2vx9hg73hqtqipe18yjnrh5ojc.png"
+    ]
   },
   {
     "name": "伊涅芙",
     "nation": "挪德卡莱",
     "birthday": "04-02",
-    "image": "https://patchwiki.biligame.com/images/ys/d/d6/74uqhk7rq0udthey661wlc3qafku4w4.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/d/d6/74uqhk7rq0udthey661wlc3qafku4w4.png",
+      "https://patchwiki.biligame.com/images/ys/c/c8/awcu75ewppcqanu18uv6fftczp6leet.png"
+    ]
   },
   {
     "name": "奈芙尔",
     "nation": "挪德卡莱",
     "birthday": "05-09",
-    "image": "https://patchwiki.biligame.com/images/ys/c/c8/01oe7symf354wrj344vd1o5n8it9iwo.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/c/c8/01oe7symf354wrj344vd1o5n8it9iwo.png",
+      "https://patchwiki.biligame.com/images/ys/9/97/ql94r57yq3nfvg06x58hiauy77q26as.png"
+    ]
   },
   {
     "name": "雅珂达",
     "nation": "挪德卡莱",
     "birthday": "01-05",
-    "image": "https://patchwiki.biligame.com/images/ys/f/f8/00lum9bzqtte2j02sjtmj012o7ncp2h.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/f/f8/00lum9bzqtte2j02sjtmj012o7ncp2h.png",
+      "https://patchwiki.biligame.com/images/ys/4/47/oh0w7lsssw7xdkoe18txp2mnsfos130.png"
+    ]
   },
   {
     "name": "莉奈娅",
     "nation": "挪德卡莱",
     "birthday": "05-23",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/f/f3/03dern5jtaybbkuh32oh6ygzxa4gbv1.png/1200px-%E8%8E%89%E5%A5%88%E5%A8%85%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/f/f3/03dern5jtaybbkuh32oh6ygzxa4gbv1.png/1200px-%E8%8E%89%E5%A5%88%E5%A8%85%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
+      "https://patchwiki.biligame.com/images/ys/9/94/nqyd1zrhoysypuu3zst1achq4qea82s.png"
+    ]
   },
   {
     "name": "叶洛亚",
     "nation": "挪德卡莱",
     "birthday": "12-23",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/f/f6/qql6g1nn9d32neqrbvc0kftweotqoe0.png/1200px-%E5%8F%B6%E6%B4%9B%E4%BA%9A%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/f/f6/qql6g1nn9d32neqrbvc0kftweotqoe0.png/1200px-%E5%8F%B6%E6%B4%9B%E4%BA%9A%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    ]
   },
   {
     "name": "埃洛伊",
     "nation": "其他",
     "birthday": "04-04",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/d/d4/c8i1nyrrh12e697sj221agawnx4gdkb.png/1200px-%E5%9F%83%E6%B4%9B%E4%BC%8A%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/d/d4/c8i1nyrrh12e697sj221agawnx4gdkb.png/1200px-%E5%9F%83%E6%B4%9B%E4%BC%8A%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    ]
   },
   {
     "name": "丝柯克",
     "nation": "其他",
     "birthday": "11-05",
-    "image": "https://patchwiki.biligame.com/images/ys/thumb/d/d0/ehtz002534qqe7cfgtpxvbxir5b2oxg.png/1200px-%E4%B8%9D%E6%9F%AF%E5%85%8B%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/thumb/d/d0/ehtz002534qqe7cfgtpxvbxir5b2oxg.png/1200px-%E4%B8%9D%E6%9F%AF%E5%85%8B%E6%8A%BD%E5%8D%A1%E7%AB%8B%E7%BB%98.png",
+      "https://patchwiki.biligame.com/images/ys/b/b5/59iged6k8juceunm5n4vxtt5ixd5rtk.png"
+    ]
   },
   {
     "name": "尼可",
     "nation": "其他",
     "birthday": "09-29",
-    "image": "https://patchwiki.biligame.com/images/ys/c/cb/q71jqsy9wye69pzzpezj3sa6at8gnhz.png"
+    "images": [
+      "https://patchwiki.biligame.com/images/ys/c/cb/q71jqsy9wye69pzzpezj3sa6at8gnhz.png",
+      "https://patchwiki.biligame.com/images/ys/2/2d/8b539mqhjjh24k98odnaiu8pa5qxpvs.png"
+    ]
   }
 ];
 
@@ -1081,6 +1890,8 @@ const NATION_RGB = {
 const FALLBACK = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(
   '<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300"><rect width="100%" height="100%" fill="#1a1a22"/><text x="50%" y="54%" font-size="52" text-anchor="middle" dominant-baseline="middle" fill="#5c5c66">?</text></svg>'
 );
+/* 取角色默认图：images[0] 即抽卡立绘，缺失时回退占位图 */
+const roleCover = r => (r && r.images && r.images[0]) || FALLBACK;
 
 /* ====================== 倒计时核心（闰年/跨天/同日多角色） ====================== */
 function isLeap(y){return (y%4===0&&y%100!==0)||y%400===0}
@@ -1140,7 +1951,7 @@ function renderHero(){
   const fig=document.getElementById("heroFig");
   const img=document.getElementById("heroImg");
   fig.style.visibility="visible";
-  img.classList.remove("ld"); img.src=r.image; img.alt=r.name;
+  img.classList.remove("ld"); img.src=roleCover(r); img.alt=r.name;
   const badge=document.getElementById("heroBadge");
   badge.textContent=d.isToday?"TODAY":"NEXT";
   /* 同一天多位角色过生日时，Hero 每 4 秒轮播，并给提示 */
@@ -1230,9 +2041,10 @@ function renderAlmanac(){
       const el=document.createElement("article");
       el.className="card rise"+(d.isToday?" today":"")+(d.isSoon?" soon":"");
       el.dataset.nation=r.nation;
+      el.dataset.name=r.name;   /* 供生日贺图弹窗按名检索 allRoleList */
       el.innerHTML=
         (d.isToday?'<span class="stamp">TODAY</span>':d.isSoon?'<span class="stamp">SOON</span>':'')
-        +'<div class="card-img"><img src="'+r.image+'" alt="'+r.name+'" loading="lazy" decoding="async"></div>'
+        +'<div class="card-img"><img src="'+roleCover(r)+'" alt="'+r.name+'" loading="lazy" decoding="async"></div>'
         +'<div class="card-body"><div class="card-top">'
         +'<span class="card-nat">'+r.nation+'</span></div><h3>'+r.name+'</h3>'
         +'<div class="card-date">'+r.birthday.replace("-"," · ")+'</div>'
@@ -1427,12 +2239,90 @@ function initTheme(){
   }
 }
 
+/* ====================== 生日贺图弹窗 ====================== */
+/* 点击角色卡片 → 弹窗展示该角色的 images 整组图片（抽卡立绘 + 生日贺图，多张可轮播）。
+   数据来源：上方 allRoleList 中该角色的 images 字段，无额外配置表。 */
+let bdList=[],bdIdx=0,bdOpenFlag=false,bdAlt="";
+function bdRender(){
+  const stage=document.getElementById("bdStage");
+  const multi=bdList.length>1;
+  stage.classList.toggle("multi",multi);
+  document.getElementById("bdCounter").textContent=(bdIdx+1)+" / "+bdList.length;
+  document.getElementById("bdCounter").style.display=multi?"":"none";
+  let img=document.getElementById("bdImg");
+  if(!img){
+    img=document.createElement("img");img.id="bdImg";img.decoding="async";
+    stage.insertBefore(img,stage.firstChild);
+  }
+  img.alt=bdAlt;
+  img.classList.remove("ld");img.src=bdList[bdIdx];
+  markLoaded(img);
+  document.getElementById("bdDots").innerHTML=bdList.map((_,i)=>
+    '<span class="bd-dot'+(i===bdIdx?" on":"")+'" data-i="'+i+'" aria-label="第 '+(i+1)+' 张"></span>'
+  ).join("");
+}
+function bdGo(i){if(!bdList.length)return;bdIdx=(i+bdList.length)%bdList.length;bdRender()}
+function bdOpen(name){
+  const r=allRoleList.find(x=>x.name===name);if(!r)return;
+  /* images[0] 为抽卡立绘，其后为生日贺图；整组直接进轮播 */
+  bdList=(r.images||[]).filter(u=>typeof u==="string"&&u.trim());
+  if(!bdList.length)bdList=[FALLBACK];
+  bdIdx=0;bdAlt=r.name;
+  const d=getDetail(r.birthday);
+  document.getElementById("bdTitle").textContent=r.name;
+  document.getElementById("bdNat").textContent=r.nation;
+  document.getElementById("bdDate").textContent=d.date+(d.isToday?" · TODAY 🎉":"");
+  document.getElementById("bdTipText").textContent=bdList.length>1
+    ?"共 "+bdList.length+" 张 · 首张为抽卡立绘，其余为生日贺图 · 可左右切换"
+    :"暂无生日贺图 · 当前展示抽卡立绘";
+  bdRender();
+  const m=document.getElementById("bdModal");
+  m.classList.add("open");m.setAttribute("aria-hidden","false");
+  bdOpenFlag=true;
+  document.body.style.overflow="hidden";   /* 弹窗打开时锁定背景滚动 */
+  document.getElementById("bdClose").focus();
+}
+function bdHide(){
+  const m=document.getElementById("bdModal");
+  m.classList.remove("open");m.setAttribute("aria-hidden","true");
+  bdOpenFlag=false;
+  document.body.style.overflow="";
+}
+function initBDModal(){
+  document.getElementById("almanac").addEventListener("click",e=>{
+    const card=e.target.closest(".card");
+    if(card&&card.dataset.name)bdOpen(card.dataset.name);
+  });
+  document.getElementById("bdMask").addEventListener("click",bdHide);
+  document.getElementById("bdClose").addEventListener("click",bdHide);
+  document.getElementById("bdPrev").addEventListener("click",()=>bdGo(bdIdx-1));
+  document.getElementById("bdNext").addEventListener("click",()=>bdGo(bdIdx+1));
+  document.getElementById("bdDots").addEventListener("click",e=>{
+    const t=e.target.closest(".bd-dot");if(t)bdGo(+t.dataset.i);
+  });
+  /* 移动端：在图片区域左右滑动切换贺图 */
+  const stage=document.getElementById("bdStage");
+  let tx=0;
+  stage.addEventListener("touchstart",e=>{tx=e.touches[0].clientX},{passive:true});
+  stage.addEventListener("touchend",e=>{
+    const dx=e.changedTouches[0].clientX-tx;
+    if(Math.abs(dx)>40)bdGo(bdIdx+(dx<0?1:-1));
+  },{passive:true});
+  document.addEventListener("keydown",e=>{
+    if(!bdOpenFlag)return;
+    if(e.key==="Escape")bdHide();
+    else if(e.key==="ArrowLeft")bdGo(bdIdx-1);
+    else if(e.key==="ArrowRight")bdGo(bdIdx+1);
+  });
+}
+
 /* ====================== 启动 ====================== */
 allRoleList.forEach((r,i)=>ROLE_NO.set(r,i+1));
 const footEl=document.getElementById("footCount");
 if(footEl)footEl.innerHTML=allRoleList.length+' 位旅伴 · 皆有名讳与日期<br>Ayash1mo';
+/* footer 图标链接独立展示，脚本仅更新署名文本，图标由静态 HTML 提供 */
 pickHero();renderToday();renderAlmanac();renderFilters();
-initCardFX();initReveal();initTheme();
+initCardFX();initReveal();initTheme();initBDModal();
 document.querySelectorAll("img").forEach(markLoaded);
 markLoaded(document.getElementById("heroImg"));
 tick();setInterval(tick,1000);
